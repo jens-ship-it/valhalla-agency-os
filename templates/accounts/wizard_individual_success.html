@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Client & Policy Created Successfully{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="text-center mb-4">
+            <div class="mb-3">
+                <i data-feather="check-circle" style="width: 64px; height: 64px; color: #28a745;"></i>
+            </div>
+            <h2 class="text-success mb-2">Success!</h2>
+            <p class="lead">Individual client and policy have been created successfully.</p>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i data-feather="user" class="me-2"></i>
+                            Client Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="mb-3">{{ contact.full_name }}</h6>
+                        <dl class="row mb-0">
+                            {% if contact.work_email %}
+                            <dt class="col-sm-4">Email:</dt>
+                            <dd class="col-sm-8">{{ contact.work_email }}</dd>
+                            {% endif %}
+                            {% if contact.phone %}
+                            <dt class="col-sm-4">Phone:</dt>
+                            <dd class="col-sm-8">{{ contact.phone }}</dd>
+                            {% endif %}
+                            {% if contact.dob %}
+                            <dt class="col-sm-4">DOB:</dt>
+                            <dd class="col-sm-8">{{ contact.dob.strftime('%m/%d/%Y') }}</dd>
+                            {% endif %}
+                            <dt class="col-sm-4">Status:</dt>
+                            <dd class="col-sm-8"><span class="badge bg-success">{{ contact.status|title }}</span></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title mb-0">
+                            <i data-feather="file-text" class="me-2"></i>
+                            Policy Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="mb-3">{{ policy.carrier.name }}</h6>
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4">Product:</dt>
+                            <dd class="col-sm-8">{{ policy.product_type|title }}</dd>
+                            {% if policy.policy_number %}
+                            <dt class="col-sm-4">Policy #:</dt>
+                            <dd class="col-sm-8">{{ policy.policy_number }}</dd>
+                            {% endif %}
+                            {% if policy.face_amount %}
+                            <dt class="col-sm-4">Face Amount:</dt>
+                            <dd class="col-sm-8">${{ "{:,.0f}".format(policy.face_amount) }}</dd>
+                            {% endif %}
+                            <dt class="col-sm-4">Status:</dt>
+                            <dd class="col-sm-8"><span class="badge bg-success">{{ policy.status|title }}</span></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if policy.is_corporate_related and policy.corporate_entity %}
+        <div class="alert alert-info">
+            <i data-feather="briefcase" class="me-2"></i>
+            <strong>Corporate Relationship:</strong> This policy is linked to {{ policy.corporate_entity.name }}
+            {% if policy.corporate_explanation %} ({{ policy.corporate_explanation }}){% endif %}
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">What would you like to do next?</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <a href="{{ url_for('accounts.individual_detail', individual_id=contact.id) }}" class="btn btn-outline-primary w-100">
+                            <i data-feather="eye" class="me-2"></i>
+                            View Client Details
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{{ url_for('accounts.wizard_individual_policy_start') }}" class="btn btn-outline-success w-100">
+                            <i data-feather="user-plus" class="me-2"></i>
+                            Add Another Client
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{{ url_for('accounts.individuals') }}" class="btn btn-outline-secondary w-100">
+                            <i data-feather="users" class="me-2"></i>
+                            View All Clients
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+
+{% block title %}Contacts - Valhalla Agency OS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2">
+                <i data-feather="phone" class="me-2"></i>
+                Contacts
+            </h1>
+            <a href="{{ url_for('contacts.create_contact') }}" class="btn btn-primary">
+                <i data-feather="plus" class="me-2"></i>
+                New Contact
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filters -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-8">
+                        {{ search_form.q(class="form-control", placeholder="Search contacts by name or email...") }}
+                    </div>
+                    <div class="col-md-2">
+                        <select name="status" class="form-select">
+                            <option value="active" {% if request.args.get('status', 'active') == 'active' %}selected{% endif %}>Active</option>
+                            <option value="inactive" {% if request.args.get('status') == 'inactive' %}selected{% endif %}>Inactive</option>
+                            <option value="all" {% if request.args.get('status') == 'all' %}selected{% endif %}>All</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <button type="submit" class="btn btn-outline-primary w-100">
+                            <i data-feather="search"></i>
+                        </button>
+                    </div>
+                    <div class="col-md-1">
+                        <a href="{{ url_for('contacts.contacts') }}" class="btn btn-outline-secondary w-100">
+                            <i data-feather="x"></i>
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contacts Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i data-feather="list" class="me-2"></i>
+                    Contacts ({{ contacts.total }} total)
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                {% if contacts.items %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Name</th>
+                                <th>Title</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Linked To</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for contact in contacts.items %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle me-2">
+                                            {{ contact.first_name[0] }}{{ contact.last_name[0] }}
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold">
+                                                <a href="{{ url_for('contacts.contact_detail', contact_id=contact.id) }}" 
+                                                   class="text-decoration-none">
+                                                    {{ contact.full_name }}
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if contact.title %}
+                                        {{ contact.title }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if contact.preferred_email %}
+                                        <a href="mailto:{{ contact.preferred_email }}">{{ contact.preferred_email }}</a>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if contact.preferred_phone %}
+                                        <a href="tel:{{ contact.preferred_phone }}">{{ contact.preferred_phone }}</a>
+                                        {% if contact.phone and contact.mobile %}
+                                            <br><small class="text-muted">+ {{ 'Mobile' if contact.preferred_phone == contact.mobile else 'Phone' }}</small>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if contact.contact_links %}
+                                        {% for link in contact.contact_links[:2] %}
+                                        <div>
+                                            <span class="badge bg-secondary">{{ link.entity_type.title() }}</span>
+                                            <small class="text-muted">{{ link.entity_name }}</small>
+                                            {% if link.is_primary %}
+                                                <i data-feather="star" class="text-warning" style="width: 14px; height: 14px;"></i>
+                                            {% endif %}
+                                        </div>
+                                        {% endfor %}
+                                        {% if contact.contact_links|length > 2 %}
+                                            <small class="text-muted">+ {{ contact.contact_links|length - 2 }} more</small>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted">Not linked</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if contact.status == 'active' %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        {{ contact.created_at.strftime('%Y-%m-%d') }}
+                                    </small>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('contacts.contact_detail', contact_id=contact.id) }}" 
+                                           class="btn btn-outline-primary" title="View Details">
+                                            <i data-feather="eye"></i>
+                                        </a>
+                                        <a href="{{ url_for('contacts.edit_contact', contact_id=contact.id) }}" 
+                                           class="btn btn-outline-secondary" title="Edit">
+                                            <i data-feather="edit"></i>
+                                        </a>
+                                        {% if contact.status == 'active' %}
+                                        <button type="button" class="btn btn-outline-warning" 
+                                                title="Inactivate"
+                                                onclick="inactivateContact({{ contact.id }}, '{{ contact.full_name }}')">
+                                            <i data-feather="archive"></i>
+                                        </button>
+                                        {% endif %}
+                                        {% if current_user.has_role('admin') %}
+                                        <button type="button" class="btn btn-outline-danger" 
+                                                title="Delete Contact"
+                                                onclick="deleteContact({{ contact.id }}, '{{ contact.full_name }}')">
+                                            <i data-feather="trash-2"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i data-feather="phone" class="text-muted mb-3" style="width: 48px; height: 48px;"></i>
+                    <h5 class="text-muted">No contacts found</h5>
+                    <p class="text-muted">Create your first contact to get started.</p>
+                    <a href="{{ url_for('contacts.create_contact') }}" class="btn btn-primary">
+                        <i data-feather="plus" class="me-2"></i>New Contact
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if contacts.pages > 1 %}
+            <div class="card-footer">
+                <nav aria-label="Contacts pagination">
+                    <ul class="pagination pagination-sm justify-content-center mb-0">
+                        {% if contacts.has_prev %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('contacts.contacts', page=contacts.prev_num, **request.args) }}">Previous</a>
+                            </li>
+                        {% endif %}
+
+                        {% for page_num in contacts.iter_pages() %}
+                            {% if page_num %}
+                                {% if page_num != contacts.page %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('contacts.contacts', page=page_num, **request.args) }}">{{ page_num }}</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ page_num }}</span>
+                                    </li>
+                                {% endif %}
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">…</span>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if contacts.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('contacts.contacts', page=contacts.next_num, **request.args) }}">Next</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h4>{{ contacts.total }}</h4>
+                <p class="mb-0">Total Contacts</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h4>{{ contacts.items|selectattr('status', 'equalto', 'active')|list|length }}</h4>
+                <p class="mb-0">Active Contacts</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h4>{{ contacts.items|selectattr('contact_links')|list|length }}</h4>
+                <p class="mb-0">Linked to Entities</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <h4>{{ contacts.items|rejectattr('contact_links')|list|length }}</h4>
+                <p class="mb-0">Unlinked</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Inactivate Modal -->
+<div class="modal fade" id="inactivateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Inactivation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to inactivate this contact?</p>
+                <div class="alert alert-warning">
+                    <i data-feather="alert-triangle" class="me-2"></i>
+                    This will inactivate the contact and hide them from default lists.
+                    Entity links and service ticket associations will be preserved.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="inactivateForm" method="POST" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="btn btn-warning">Inactivate</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to permanently delete this contact?</p>
+                <div class="alert alert-danger">
+                    <i data-feather="alert-triangle" class="me-2"></i>
+                    <strong>Warning:</strong> This action cannot be undone. The contact and all associated data will be permanently removed.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="btn btn-danger">Delete Permanently</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function inactivateContact(contactId, contactName) {
+    const form = document.getElementById('inactivateForm');
+    form.action = `{{ url_for('contacts.inactivate_contact', contact_id=0) }}`.replace('0', contactId);
+
+    const modal = new bootstrap.Modal(document.getElementById('inactivateModal'));
+    modal.show();
+}
+
+function deleteContact(contactId, contactName) {
+    const form = document.getElementById('deleteForm');
+    form.action = `{{ url_for('contacts.delete_contact', contact_id=0) }}`.replace('0', contactId);
+
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
+}
+</script>
+{% endblock %}

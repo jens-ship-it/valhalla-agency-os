@@ -1,0 +1,12 @@
+__pycache__/
+  *.pyc
+  *.pyo
+  *.pyd
+  .env
+  *.db
+  *.sqlite3
+  instance/
+  .DS_Store
+  node_modules/
+  package-lock.json
+  

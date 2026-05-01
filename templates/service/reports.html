@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}Service Reports - Valhalla Agency OS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2">
+                <i data-feather="bar-chart-2" class="me-2"></i>
+                Service Reports
+            </h1>
+            <a href="{{ url_for('service.export_csv') }}" class="btn btn-success">
+                <i data-feather="download" class="me-2"></i>
+                Export CSV
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i data-feather="filter" class="me-2"></i>
+                    Report Filters
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" name="start_date" class="form-control" 
+                               value="{{ request.args.get('start_date', '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">End Date</label>
+                        <input type="date" name="end_date" class="form-control" 
+                               value="{{ request.args.get('end_date', '') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Client Type</label>
+                        <select name="client_type" class="form-select">
+                            <option value="">All Types</option>
+                            <option value="organization" {% if request.args.get('client_type') == 'organization' %}selected{% endif %}>Organization</option>
+                            <option value="individual" {% if request.args.get('client_type') == 'individual' %}selected{% endif %}>Individual</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Assigned To</label>
+                        <select name="assigned_to" class="form-select">
+                            <option value="">All Users</option>
+                            {% for user in users %}
+                                <option value="{{ user.id }}" {% if request.args.get('assigned_to')|int == user.id %}selected{% endif %}>
+                                    {{ user.full_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i data-feather="search" class="me-2"></i>Apply Filters
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Client Summary Report -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i data-feather="users" class="me-2"></i>
+                    Summary by Client
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                {% if client_summary %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Client Name</th>
+                                <th>Type</th>
+                                <th>Open</th>
+                                <th>Pending Confirmation</th>
+                                <th>Complete</th>
+                                <th>Avg Age (Days)</th>
+                                <th>Oldest Due Date</th>
+                                <th>Total Tickets</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for summary in client_summary %}
+                            <tr>
+                                <td class="fw-semibold">{{ summary.client_name }}</td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ summary.client_type.title() }}</span>
+                                </td>
+                                <td>
+                                    {% if summary.open_count > 0 %}
+                                        <span class="badge bg-warning">{{ summary.open_count }}</span>
+                                    {% else %}
+                                        <span class="text-muted">0</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if summary.pending_confirmation_count > 0 %}
+                                        <span class="badge bg-info">{{ summary.pending_confirmation_count }}</span>
+                                    {% else %}
+                                        <span class="text-muted">0</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if summary.complete_count > 0 %}
+                                        <span class="badge bg-success">{{ summary.complete_count }}</span>
+                                    {% else %}
+                                        <span class="text-muted">0</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if summary.avg_age_open %}
+                                        {{ "%.1f"|format(summary.avg_age_open) }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if summary.oldest_open_due_date %}
+                                        {{ summary.oldest_open_due_date.strftime('%Y-%m-%d') }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong>{{ summary.total_tickets }}</strong>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i data-feather="bar-chart-2" class="text-muted mb-3" style="width: 48px; height: 48px;"></i>
+                    <h5 class="text-muted">No data found</h5>
+                    <p class="text-muted">No tickets match your current filter criteria.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User Breakdown Report -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i data-feather="user" class="me-2"></i>
+                    Breakdown by Assigned User
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                {% if user_breakdown %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Client Type</th>
+                                <th>Client ID</th>
+                                <th>Assigned User</th>
+                                <th>Ticket Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for breakdown in user_breakdown %}
+                            <tr>
+                                <td>
+                                    <span class="badge bg-secondary">{{ breakdown.client_type.title() }}</span>
+                                </td>
+                                <td><code>#{{ breakdown.client_id }}</code></td>
+                                <td>
+                                    {% if breakdown.assigned_user %}
+                                        {{ breakdown.assigned_user }}
+                                    {% else %}
+                                        <span class="text-muted">Unassigned</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary">{{ breakdown.ticket_count }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i data-feather="user" class="text-muted mb-3" style="width: 48px; height: 48px;"></i>
+                    <h5 class="text-muted">No breakdown data</h5>
+                    <p class="text-muted">No user assignment data found for current filters.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats Cards -->
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <i data-feather="clipboard" class="mb-2" style="width: 32px; height: 32px;"></i>
+                <h4>{{ client_summary|length if client_summary else 0 }}</h4>
+                <p class="mb-0">Clients with Tickets</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <i data-feather="clock" class="mb-2" style="width: 32px; height: 32px;"></i>
+                <h4>{{ client_summary|selectattr('open_count')|map(attribute='open_count')|sum if client_summary else 0 }}</h4>
+                <p class="mb-0">Open Tickets</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <i data-feather="pause-circle" class="mb-2" style="width: 32px; height: 32px;"></i>
+                <h4>{{ client_summary|selectattr('pending_confirmation_count')|map(attribute='pending_confirmation_count')|sum if client_summary else 0 }}</h4>
+                <p class="mb-0">Pending Confirmation</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <i data-feather="check-circle" class="mb-2" style="width: 32px; height: 32px;"></i>
+                <h4>{{ client_summary|selectattr('complete_count')|map(attribute='complete_count')|sum if client_summary else 0 }}</h4>
+                <p class="mb-0">Completed Tickets</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

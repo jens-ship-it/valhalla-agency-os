@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}New Individual Client + Policy - Step 3{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i data-feather="user-plus" class="me-2"></i>
+            New Individual Client + Policy
+        </h2>
+
+        <!-- Progress Indicator -->
+        <div class="mb-4">
+            <div class="d-flex justify-content-between mb-2">
+                <span class="badge bg-success"><i data-feather="check" class="feather-sm"></i> Step 1: Client Info</span>
+                <span class="badge bg-success"><i data-feather="check" class="feather-sm"></i> Step 2: Corporate Link</span>
+                <span class="badge bg-primary">Step 3: Policy Details</span>
+            </div>
+            <div class="progress" style="height: 3px;">
+                <div class="progress-bar bg-primary" role="progressbar" style="width: 100%"></div>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="alert alert-info mb-4">
+            <strong>Creating client:</strong> {{ wizard_data.individual.first_name }} {{ wizard_data.individual.last_name }}
+            {% if wizard_data.entity.is_corporate_related %}
+            <br><strong>Corporate relationship:</strong> Yes{% if wizard_data.entity.corporate_explanation %} ({{ wizard_data.entity.corporate_explanation }}){% endif %}
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Policy Details</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('accounts.wizard_individual_policy_details') }}">
+                    {{ form.hidden_tag() }}
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.carrier_id.label(class="form-label") }}
+                            {{ form.carrier_id(class="form-select" + (" is-invalid" if form.carrier_id.errors else "")) }}
+                            {% if form.carrier_id.errors %}
+                                <div class="invalid-feedback">{{ form.carrier_id.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.product_type.label(class="form-label") }}
+                            {{ form.product_type(class="form-select" + (" is-invalid" if form.product_type.errors else "")) }}
+                            {% if form.product_type.errors %}
+                                <div class="invalid-feedback">{{ form.product_type.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.face_amount.label(class="form-label") }}
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                {{ form.face_amount(class="form-control", placeholder="e.g., 2000000") }}
+                            </div>
+                            <small class="text-muted">Enter amount without commas (e.g., 2000000 for $2M)</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.premium_amount.label(class="form-label") }}
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                {{ form.premium_amount(class="form-control", placeholder="e.g., 150.00") }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            {{ form.premium_frequency.label(class="form-label") }}
+                            {{ form.premium_frequency(class="form-select") }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            {{ form.policy_number.label(class="form-label") }}
+                            {{ form.policy_number(class="form-control", placeholder="Policy #") }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            {{ form.status.label(class="form-label") }}
+                            {{ form.status(class="form-select") }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.effective_date.label(class="form-label") }}
+                            {{ form.effective_date(class="form-control" + (" is-invalid" if form.effective_date.errors else "")) }}
+                            {% if form.effective_date.errors %}
+                                <div class="invalid-feedback">{{ form.effective_date.errors[0] }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.maturity_date.label(class="form-label") }}
+                            {{ form.maturity_date(class="form-control") }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.notes.label(class="form-label") }}
+                        {{ form.notes(class="form-control", rows="3") }}
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('accounts.wizard_individual_policy_entity') }}" class="btn btn-secondary">
+                            <i data-feather="arrow-left" class="me-1"></i>Back
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i data-feather="check-circle" class="me-1"></i>Create Client & Policy
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

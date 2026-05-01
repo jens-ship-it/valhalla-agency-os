@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block title %}Ticket #{{ ticket.id }} - {{ ticket.title }} - Valhalla Agency OS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-start mb-4">
+            <div>
+                <h1 class="h2">
+                    <i data-feather="clipboard" class="me-2"></i>
+                    <code>#{{ ticket.id }}</code> {{ ticket.title }}
+                </h1>
+                <div class="d-flex align-items-center gap-2 mt-2">
+                    {% set priority_class = {
+                        'low': 'secondary',
+                        'normal': 'primary', 
+                        'high': 'warning',
+                        'urgent': 'danger'
+                    } %}
+                    <span class="badge bg-{{ priority_class.get(ticket.priority, 'secondary') }}">
+                        {{ ticket.priority.title() }} Priority
+                    </span>
+                    
+                    {% set status_class = {
+                        'not_started': 'secondary',
+                        'started': 'primary',
+                        'started_waiting_on_someone_else': 'warning', 
+                        'complete_pending_confirmation': 'info',
+                        'complete': 'success'
+                    } %}
+                    <span class="badge bg-{{ status_class.get(ticket.status, 'secondary') }}">
+                        {{ dict(ticket.get_status_choices())[ticket.status] }}
+                    </span>
+                    
+                    {% if ticket.is_overdue %}
+                    <span class="badge bg-danger">
+                        <i data-feather="clock" class="me-1"></i>Overdue
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="btn-group">
+                <a href="{{ url_for('service.edit_ticket', ticket_id=ticket.id) }}" class="btn btn-outline-primary">
+                    <i data-feather="edit" class="me-2"></i>Edit
+                </a>
+                {% if ticket.status != 'complete' %}
+                <form method="POST" action="{{ url_for('service.close_ticket', ticket_id=ticket.id) }}" style="display: inline;">
+                    <button type="submit" class="btn btn-success" 
+                            onclick="return confirm('Are you sure you want to close this ticket?')">
+                        <i data-feather="check-circle" class="me-2"></i>Close Ticket
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Ticket Details -->
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i data-feather="info" class="me-2"></i>
+                    Ticket Details
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if ticket.description %}
+                <div class="mb-3">
+                    <h6>Description</h6>
+                    <p class="text-muted">{{ ticket.description|nl2br }}</p>
+                </div>
+                {% endif %}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Client</h6>
+                        <p>
+                            <strong>{{ ticket.client_name }}</strong><br>
+                            <small class="text-muted">{{ ticket.client_type.title() }}</small>
+                        </p>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6>Due Date</h6>
+                        <p class="{% if ticket.is_overdue %}text-danger{% endif %}">
+                            {% if ticket.due_date %}
+                                {{ ticket.due_date.strftime('%B %d, %Y') }}
+                                {% if ticket.is_overdue %}
+                                    <br><small class="text-danger">{{ ticket.age_days }} days overdue</small>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted">No due date set</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Related Contacts -->
+        {% if ticket_contacts %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i data-feather="users" class="me-2"></i>
+                    Related Contacts
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for ticket_contact, contact in ticket_contacts %}
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-circle me-3">
+                                {{ contact.first_name[0] }}{{ contact.last_name[0] }}
+                            </div>
+                            <div>
+                                <div class="fw-semibold">
+                                    <a href="{{ url_for('contacts.contact_detail', contact_id=contact.id) }}" 
+                                       class="text-decoration-none">
+                                        {{ contact.full_name }}
+                                    </a>
+                                </div>
+                                {% if contact.title %}
+                                    <small class="text-muted">{{ contact.title }}</small><br>
+                                {% endif %}
+                                {% if ticket_contact.relationship_label %}
+                                    <span class="badge bg-secondary">{{ ticket_contact.relationship_label }}</span>
+                                {% endif %}
+                                {% if contact.email %}
+                                    <br><small class="text-muted">{{ contact.email }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Notes -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i data-feather="message-square" class="me-2"></i>
+                    Notes ({{ notes|length }})
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- Add Note Form -->
+                <form method="POST" action="{{ url_for('service.add_note', ticket_id=ticket.id) }}" class="mb-4">
+                    <div class="mb-3">
+                        <label for="body" class="form-label">Add Note</label>
+                        <textarea name="body" id="body" class="form-control" rows="3" required 
+                                  placeholder="Enter your note here..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i data-feather="plus" class="me-2"></i>Add Note
+                    </button>
+                </form>
+                
+                <!-- Notes List -->
+                {% if notes %}
+                <div class="notes-list">
+                    {% for note in notes %}
+                    <div class="note-item border-start border-3 border-primary ps-3 mb-3">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-circle-sm me-2">
+                                    {{ note.author.first_name[0] }}{{ note.author.last_name[0] }}
+                                </div>
+                                <div>
+                                    <strong>{{ note.author.full_name }}</strong>
+                                    <small class="text-muted ms-2">
+                                        {{ note.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="mb-0">{{ note.body|nl2br }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center text-muted py-3">
+                    <i data-feather="message-square" class="mb-2" style="width: 32px; height: 32px;"></i>
+                    <p>No notes yet. Add the first note above.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="card-title mb-0">Assignment</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <small class="text-muted">Created by</small>
+                    <div class="d-flex align-items-center mt-1">
+                        <div class="avatar-circle-sm me-2">
+                            {{ ticket.created_by.first_name[0] }}{{ ticket.created_by.last_name[0] }}
+                        </div>
+                        <div>
+                            <div class="fw-semibold">{{ ticket.created_by.full_name }}</div>
+                            <small class="text-muted">{{ ticket.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <small class="text-muted">Assigned to</small>
+                    {% if ticket.assigned_to %}
+                    <div class="d-flex align-items-center mt-1">
+                        <div class="avatar-circle-sm me-2">
+                            {{ ticket.assigned_to.first_name[0] }}{{ ticket.assigned_to.last_name[0] }}
+                        </div>
+                        <div class="fw-semibold">{{ ticket.assigned_to.full_name }}</div>
+                    </div>
+                    {% else %}
+                    <div class="text-muted mt-1">Unassigned</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="card-title mb-0">Timeline</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <small class="text-muted">Created</small>
+                    <div>{{ ticket.created_at.strftime('%B %d, %Y at %I:%M %p') }}</div>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">Last Updated</small>
+                    <div>{{ ticket.updated_at.strftime('%B %d, %Y at %I:%M %p') }}</div>
+                </div>
+                <div>
+                    <small class="text-muted">Age</small>
+                    <div>{{ ticket.age_days }} days</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('service.edit_ticket', ticket_id=ticket.id) }}" class="btn btn-outline-primary btn-sm">
+                        <i data-feather="edit" class="me-2"></i>Edit Ticket
+                    </a>
+                    {% if ticket.status != 'complete' %}
+                    <form method="POST" action="{{ url_for('service.close_ticket', ticket_id=ticket.id) }}">
+                        <button type="submit" class="btn btn-outline-success btn-sm w-100"
+                                onclick="return confirm('Close this ticket?')">
+                            <i data-feather="check-circle" class="me-2"></i>Close Ticket
+                        </button>
+                    </form>
+                    {% endif %}
+                    <a href="{{ url_for('service.tickets') }}" class="btn btn-outline-secondary btn-sm">
+                        <i data-feather="arrow-left" class="me-2"></i>Back to Tickets
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

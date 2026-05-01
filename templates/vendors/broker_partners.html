@@ -1,0 +1,167 @@
+
+{% extends "base.html" %}
+
+{% block title %}Brokerage Relationships - Valhalla Agency OS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>
+        <i data-feather="handshake" class="me-2"></i>
+        Brokerage Relationships
+    </h2>
+    <a href="{{ url_for('vendors.create_vendor') }}" class="btn btn-primary">
+        <i data-feather="plus" class="me-1"></i>Add Broker Partner
+    </a>
+</div>
+
+<!-- Search -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-8">
+                <input type="text" name="q" class="form-control" 
+                       placeholder="Search broker partners..." 
+                       value="{{ search }}" autocomplete="off">
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-outline-primary me-2">
+                    <i data-feather="search" class="me-1"></i>Search
+                </button>
+                {% if search %}
+                <a href="{{ url_for('vendors.broker_partners') }}" class="btn btn-outline-secondary">
+                    <i data-feather="x" class="me-1"></i>Clear
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Broker Partners List -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Broker Partners ({{ brokers.total }})</h5>
+    </div>
+    <div class="card-body p-0">
+        {% if brokers.items %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Broker Partner</th>
+                        <th>Primary Contact</th>
+                        <th>Location</th>
+                        <th>Active Clients</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for broker in brokers.items %}
+                    <tr>
+                        <td>
+                            <div>
+                                <strong>{{ broker.name }}</strong>
+                                {% if broker.website %}
+                                <br><small class="text-muted">{{ broker.website }}</small>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            {% if broker.primary_contact %}
+                                <a href="{{ url_for('contacts.contact_detail', contact_id=broker.primary_contact.id) }}" 
+                                   class="text-decoration-none">
+                                    {{ broker.primary_contact.full_name }}
+                                </a>
+                                <br><small class="text-muted">{{ broker.primary_contact.preferred_email }}</small>
+                            {% else %}
+                                <span class="text-muted">No primary contact</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if broker.city and broker.state %}
+                                {{ broker.city }}, {{ broker.state }}
+                            {% else %}
+                                <span class="text-muted">Not specified</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ broker.brokered_clients|length }}</span>
+                        </td>
+                        <td class="text-end">
+                            <a href="{{ url_for('vendors.broker_clients', broker_id=broker.id) }}" 
+                               class="btn btn-sm btn-outline-primary me-1">
+                                <i data-feather="users" class="me-1"></i>Clients
+                            </a>
+                            <a href="{{ url_for('vendors.vendor_detail', vendor_id=broker.id) }}" 
+                               class="btn btn-sm btn-outline-secondary">
+                                <i data-feather="eye" class="me-1"></i>View
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i data-feather="handshake" class="text-muted mb-3" style="width: 48px; height: 48px;"></i>
+            <h5 class="text-muted">No Broker Partners Found</h5>
+            <p class="text-muted">
+                {% if search %}
+                    No broker partners match your search criteria.
+                {% else %}
+                    Start by adding your first broker partner.
+                {% endif %}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if brokers.pages > 1 %}
+    <div class="card-footer">
+        <nav aria-label="Broker partners pagination">
+            <ul class="pagination pagination-sm justify-content-center mb-0">
+                {% if brokers.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('vendors.broker_partners', page=brokers.prev_num, q=search) }}">Previous</a>
+                </li>
+                {% endif %}
+                
+                {% for page_num in brokers.iter_pages() %}
+                    {% if page_num %}
+                        {% if page_num != brokers.page %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('vendors.broker_partners', page=page_num, q=search) }}">{{ page_num }}</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                        {% endif %}
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">…</span>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if brokers.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('vendors.broker_partners', page=brokers.next_num, q=search) }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    feather.replace();
+});
+</script>
+{% endblock %}

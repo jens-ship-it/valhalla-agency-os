@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+
+{% block title %}Vendors - Valhalla Agency OS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2">
+                <i data-feather="briefcase" class="me-2"></i>
+                Vendors
+            </h1>
+            <a href="{{ url_for('vendors.create_vendor') }}" class="btn btn-primary">
+                <i data-feather="plus" class="me-2"></i>
+                New Vendor
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filters -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-4">
+                        {{ search_form.q(class="form-control", placeholder="Search vendors by name or type...") }}
+                    </div>
+                    <div class="col-md-3">
+                        <select name="vendor_type" class="form-select">
+                            <option value="">All Types</option>
+                            {% for value, label in vendor_type_choices %}
+                                <option value="{{ value }}" {% if request.args.get('vendor_type') == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="status" class="form-select">
+                            <option value="active" {% if request.args.get('status', 'active') == 'active' %}selected{% endif %}>Active</option>
+                            <option value="inactive" {% if request.args.get('status') == 'inactive' %}selected{% endif %}>Inactive</option>
+                            <option value="all" {% if request.args.get('status') == 'all' %}selected{% endif %}>All</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <button type="submit" class="btn btn-outline-primary w-100">
+                            <i data-feather="search"></i>
+                        </button>
+                    </div>
+                    <div class="col-md-2">
+                        <a href="{{ url_for('vendors.vendors') }}" class="btn btn-outline-secondary w-100">
+                            <i data-feather="x" class="me-2"></i>Clear
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Vendors Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i data-feather="list" class="me-2"></i>
+                    Vendors ({{ vendors.total }} total)
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                {% if vendors.items %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Role/Services</th>
+                                <th>Contact</th>
+                                <th>Website</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vendor in vendors.items %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle me-2">
+                                            {{ vendor.name[0] }}
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold">
+                                                <a href="{{ url_for('vendors.vendor_detail', vendor_id=vendor.id) }}"
+                                                   class="text-decoration-none">
+                                                    {{ vendor.name }}
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% set type_class = {
+                                        'insurer': 'primary',
+                                        'administration_services': 'success',
+                                        'pbm': 'info',
+                                        'broker_partner': 'warning',
+                                        'consultant': 'secondary',
+                                        'attorney': 'dark',
+                                        'general_agent': 'info',
+                                        'mgu': 'dark',
+                                        'actuary': 'light',
+                                        'other': 'light'
+                                    } %}
+                                    {% if vendor.vendor_detail and vendor.vendor_detail.vendor_type %}
+                                        <span class="badge bg-{{ type_class.get(vendor.vendor_detail.vendor_type, 'secondary') }}">
+                                            {{ dict(vendor_type_choices).get(vendor.vendor_detail.vendor_type, vendor.vendor_detail.vendor_type.title()) }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if vendor.vendor_detail.description %}
+                                        <div class="small">
+                                            {{ vendor.vendor_detail.description[:100] }}{% if vendor.vendor_detail.description|length > 100 %}...{% endif %}
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if vendor.email %}
+                                        <div><a href="mailto:{{ vendor.email }}">{{ vendor.email }}</a></div>
+                                    {% endif %}
+                                    {% if vendor.phone %}
+                                        <div><a href="tel:{{ vendor.phone }}">{{ vendor.phone }}</a></div>
+                                    {% endif %}
+                                    {% if not vendor.email and not vendor.phone %}
+                                        <span class="text-muted">No contact info</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if vendor.website %}
+                                        <a href="{{ vendor.website }}" target="_blank" class="btn btn-outline-secondary btn-sm">
+                                            <i data-feather="external-link" class="me-1"></i>Visit
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if vendor.status == 'active' %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        {{ vendor.created_at.strftime('%Y-%m-%d') }}
+                                    </small>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('vendors.vendor_detail', vendor_id=vendor.id) }}"
+                                           class="btn btn-outline-primary" title="View Details">
+                                            <i data-feather="eye"></i>
+                                        </a>
+                                        <a href="{{ url_for('vendors.edit_vendor', vendor_id=vendor.id) }}"
+                                           class="btn btn-outline-secondary" title="Edit">
+                                            <i data-feather="edit"></i>
+                                        </a>
+                                        {% if vendor.status == 'active' %}
+                                        <button type="button" class="btn btn-outline-warning"
+                                                title="Inactivate"
+                                                onclick="inactivateVendor({{ vendor.id }}, '{{ vendor.name }}')">
+                                            <i data-feather="archive"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i data-feather="briefcase" class="text-muted mb-3" style="width: 48px; height: 48px;"></i>
+                    <h5 class="text-muted">No vendors found</h5>
+                    <p class="text-muted">Create your first vendor to get started.</p>
+                    <a href="{{ url_for('vendors.create_vendor') }}" class="btn btn-primary">
+                        <i data-feather="plus" class="me-2"></i>New Vendor
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if vendors.pages > 1 %}
+            <div class="card-footer">
+                <nav aria-label="Vendors pagination">
+                    <ul class="pagination pagination-sm justify-content-center mb-0">
+                        {% if vendors.has_prev %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('vendors.vendors', page=vendors.prev_num, **request.args) }}">Previous</a>
+                            </li>
+                        {% endif %}
+
+                        {% for page_num in vendors.iter_pages() %}
+                            {% if page_num %}
+                                {% if page_num != vendors.page %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('vendors.vendors', page=page_num, **request.args) }}">{{ page_num }}</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ page_num }}</span>
+                                    </li>
+                                {% endif %}
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">…</span>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if vendors.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('vendors.vendors', page=vendors.next_num, **request.args) }}">Next</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h4>{{ vendor_counts.insurers }}</h4>
+                <p class="mb-0">Insurers</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h4>{{ vendor_counts.tpas }}</h4>
+                <p class="mb-0">TPAs</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h4>{{ vendor_counts.broker_partners }}</h4>
+                <p class="mb-0">Broker Partners</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-secondary text-white">
+            <div class="card-body text-center">
+                <h4>{{ vendor_counts.consultants }}</h4>
+                <p class="mb-0">Consultants</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Inactivate Modal -->
+<div class="modal fade" id="inactivateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Inactivation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="inactivateMessage"></p>
+                <div class="alert alert-warning">
+                    <i data-feather="alert-triangle" class="me-2"></i>
+                    This will inactivate the vendor and hide them from default lists.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-warning">Inactivate</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function inactivateVendor(vendorId, vendorName) {
+    const modal = new bootstrap.Modal(document.getElementById('inactivateModal'));
+    const message = document.getElementById('inactivateMessage');
+    const form = document.querySelector('#inactivateModal form');
+
+    message.textContent = `Are you sure you want to inactivate "${vendorName}"?`;
+    form.action = `{{ url_for('vendors.inactivate_vendor', vendor_id=0) }}`.replace('0', vendorId);
+
+    modal.show();
+}
+</script>
+{% endblock %}

@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit Deal' if deal else 'New Deal' }} - Valhalla Agency OS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i data-feather="{{ 'edit' if deal else 'plus' }}" class="me-2"></i>
+                    {{ 'Edit Deal' if deal else 'New Deal' }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        {{ form.name.label(class="form-label") }}
+                        {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                        {% if form.name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.name.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">Descriptive name for this sales opportunity</div>
+                    </div>
+
+                    <!-- Client Association -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.entity_id.label(class="form-label") }}
+                            {{ form.entity_id(class="form-select" + (" is-invalid" if form.entity_id.errors else "")) }}
+                            {% if form.entity_id.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.entity_id.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            {{ form.contact_id.label(class="form-label") }}
+                            {{ form.contact_id(class="form-select" + (" is-invalid" if form.contact_id.errors else "")) }}
+                            {% if form.contact_id.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.contact_id.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i data-feather="info" class="me-2"></i>
+                        <small>Select either an organization or individual client. Leave both blank for prospective clients.</small>
+                    </div>
+
+                    <!-- Deal Details -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.stage.label(class="form-label") }}
+                            {{ form.stage(class="form-select" + (" is-invalid" if form.stage.errors else "")) }}
+                            {% if form.stage.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.stage.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            {{ form.owner_user_id.label(class="form-label") }}
+                            {{ form.owner_user_id(class="form-select" + (" is-invalid" if form.owner_user_id.errors else "")) }}
+                            {% if form.owner_user_id.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.owner_user_id.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Financial and Timeline -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.est_close_date.label(class="form-label") }}
+                            {{ form.est_close_date(class="form-control" + (" is-invalid" if form.est_close_date.errors else "")) }}
+                            {% if form.est_close_date.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.est_close_date.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            {{ form.est_premium_value.label(class="form-label") }}
+                            {{ form.est_premium_value(class="form-control" + (" is-invalid" if form.est_premium_value.errors else "")) }}
+                            {% if form.est_premium_value.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.est_premium_value.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.recurring.label(class="form-label") }}
+                            {{ form.recurring(class="form-select" + (" is-invalid" if form.recurring.errors else "")) }}
+                            {% if form.recurring.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.recurring.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="mb-4">
+                        {{ form.notes.label(class="form-label") }}
+                        {{ form.notes(class="form-control", rows="5", placeholder="Deal notes, client requirements, competitive situation, next steps...") }}
+                        {% if form.notes.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.notes.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('sales.deals') }}" class="btn btn-secondary">
+                            <i data-feather="arrow-left" class="me-2"></i>
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i data-feather="{{ 'save' if deal else 'plus' }}" class="me-2"></i>
+                            {{ 'Update Deal' if deal else 'Create Deal' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Deal Stage Information -->
+<div class="row mt-4">
+    <div class="col-md-8 mx-auto">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i data-feather="info" class="me-2"></i>
+                    Sales Stage Definitions
+                </h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled small">
+                            <li><strong>Lead:</strong> Initial prospect identification</li>
+                            <li><strong>Discovery:</strong> Needs assessment and qualification</li>
+                            <li><strong>Proposal:</strong> Formal proposal submitted</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled small">
+                            <li><strong>Verbal Yes:</strong> Verbal commitment received</li>
+                            <li><strong>Closed Won:</strong> Contract signed and won</li>
+                            <li><strong>Closed Lost:</strong> Deal lost to competitor or cancelled</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Prevent selecting both organization and individual
+document.addEventListener('DOMContentLoaded', function() {
+    const orgSelect = document.getElementById('entity_id');
+    const indSelect = document.getElementById('contact_id');
+
+    orgSelect.addEventListener('change', function() {
+        if (this.value) {
+            indSelect.value = '';
+        }
+    });
+
+    indSelect.addEventListener('change', function() {
+        if (this.value) {
+            orgSelect.value = '';
+        }
+    });
+});
+
+// Format premium value input
+document.getElementById('est_premium_value').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/[^0-9.]/g, '');
+    if (value) {
+        // Basic number formatting
+        const parts = value.split('.');
+        if (parts[0]) {
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+        if (parts.length > 1) {
+            e.target.value = parts[0] + '.' + parts[1].substring(0, 2);
+        } else {
+            e.target.value = parts[0];
+        }
+    }
+});
+
+// Stage change warnings
+document.getElementById('stage').addEventListener('change', function(e) {
+    const stage = e.target.value;
+    if (stage === 'closed_lost') {
+        if (!confirm('Are you sure you want to mark this deal as Closed Lost?')) {
+            e.target.value = '{{ deal.stage if deal else "lead" }}';
+        }
+    }
+});
+</script>
+{% endblock %}

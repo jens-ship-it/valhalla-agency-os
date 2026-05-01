@@ -1,0 +1,70 @@
+
+{% extends "base.html" %}
+
+{% block title %}Convert Deal to Client - Valhalla Agency OS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i data-feather="user-plus" class="me-2"></i>
+                    Convert Deal to Client
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i data-feather="info" class="me-2"></i>
+                    <strong>Deal Won!</strong> Convert "{{ deal.contact.full_name }}" from a contact to a client to begin managing their policies.
+                </div>
+
+                <div class="mb-3">
+                    <h6>Deal Details:</h6>
+                    <ul class="list-unstyled">
+                        <li><strong>Deal:</strong> {{ deal.name }}</li>
+                        <li><strong>Contact:</strong> {{ deal.contact.full_name }}</li>
+                        <li><strong>Estimated Value:</strong> ${{ "{:,.2f}".format(deal.est_premium_value or 0) }}</li>
+                        <li><strong>Type:</strong> {{ deal.recurring }}</li>
+                    </ul>
+                </div>
+
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="ssn_last4" class="form-label">Last 4 digits of SSN</label>
+                        <input type="text" class="form-control" id="ssn_last4" name="ssn_last4" 
+                               maxlength="4" pattern="[0-9]{4}" 
+                               placeholder="1234">
+                        <div class="form-text">Optional - for client identification purposes</div>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i data-feather="alert-triangle" class="me-2"></i>
+                        <small>After conversion, you'll be able to create individual policies for this client.</small>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('sales.deals') }}" class="btn btn-secondary">
+                            <i data-feather="arrow-left" class="me-2"></i>
+                            Back to Deals
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i data-feather="user-plus" class="me-2"></i>
+                            Convert to Client
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Format SSN input
+document.getElementById('ssn_last4').addEventListener('input', function(e) {
+    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+});
+</script>
+{% endblock %}

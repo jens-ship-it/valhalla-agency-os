@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>{{ title }}</h2>
+                <a href="{{ url_for('contacts.contacts') }}" class="btn btn-outline-secondary">
+                    <i data-feather="arrow-left" class="me-2"></i>Back to Contacts
+                </a>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <form method="POST">
+                                {{ form.hidden_tag() }}
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.contact_id.label(class="form-label") }}
+                                        {{ form.contact_id(class="form-select") }}
+                                        {% if form.contact_id.errors %}
+                                            <div class="text-danger">
+                                                {% for error in form.contact_id.errors %}
+                                                    <small>{{ error }}</small>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.user_id.label(class="form-label") }}
+                                        {{ form.user_id(class="form-select") }}
+                                        {% if form.user_id.errors %}
+                                            <div class="text-danger">
+                                                {% for error in form.user_id.errors %}
+                                                    <small>{{ error }}</small>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    {{ form.category.label(class="form-label") }}
+                                    {{ form.category(class="form-select") }}
+                                    {% if form.category.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.category.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    {{ form.explanation.label(class="form-label") }}
+                                    {{ form.explanation(class="form-control") }}
+                                    <div class="form-text">Examples: CPA, attorney, NYU, PSU, local friend, Greek Organization, family member, business partner</div>
+                                    {% if form.explanation.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.explanation.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    {{ form.notes.label(class="form-label") }}
+                                    {{ form.notes(class="form-control") }}
+                                    {% if form.notes.errors %}
+                                        <div class="text-danger">
+                                            {% for error in form.notes.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="{{ url_for('contacts.contacts') }}" class="btn btn-secondary">Cancel</a>
+                                    {{ form.submit(class="btn btn-primary") }}
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

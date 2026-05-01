@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit Contact' if contact else 'New Contact' }} - Valhalla Agency OS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i data-feather="{{ 'edit' if contact else 'plus' }}" class="me-2"></i>
+                    {{ 'Edit Contact' if contact else 'New Contact' }}
+                </h4>
+                {% if request.args.get('entity_type') and request.args.get('entity_id') %}
+                <small class="text-muted">
+                    This contact will be automatically linked to the selected {{ request.args.get('entity_type') }}.
+                </small>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <!-- Basic Information -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.first_name.label(class="form-label") }}
+                            {{ form.first_name(class="form-control" + (" is-invalid" if form.first_name.errors else "")) }}
+                            {% if form.first_name.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.first_name.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.last_name.label(class="form-label") }}
+                            {{ form.last_name(class="form-control" + (" is-invalid" if form.last_name.errors else "")) }}
+                            {% if form.last_name.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.last_name.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Status</label>
+                            <select name="status" class="form-select">
+                                <option value="active" {% if not contact or contact.status == 'active' %}selected{% endif %}>Active</option>
+                                <option value="inactive" {% if contact and contact.status == 'inactive' %}selected{% endif %}>Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Information -->
+                    <h5 class="mt-4 mb-3">
+                        <i data-feather="phone" class="me-2"></i>
+                        Contact Information
+                    </h5>
+                    
+                    <div class="mb-3">
+                        {{ form.email.label(class="form-label") }}
+                        {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""), type="email") }}
+                        {% if form.email.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.email.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.phone.label(class="form-label") }}
+                            {{ form.phone(class="form-control" + (" is-invalid" if form.phone.errors else ""), placeholder="(555) 123-4567") }}
+                            {% if form.phone.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.phone.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Business or home phone</div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.mobile.label(class="form-label") }}
+                            {{ form.mobile(class="form-control" + (" is-invalid" if form.mobile.errors else ""), placeholder="(555) 987-6543") }}
+                            {% if form.mobile.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.mobile.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Mobile or cell phone</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Notes -->
+                    <div class="mb-4">
+                        {{ form.notes.label(class="form-label") }}
+                        {{ form.notes(class="form-control", rows="4", placeholder="Additional notes about this contact...") }}
+                        {% if form.notes.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.notes.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Role field for auto-linking -->
+                    {% if request.args.get('entity_type') and request.args.get('entity_id') %}
+                    <div class="mb-3">
+                        <label for="role_at_entity" class="form-label">Role at {{ request.args.get('entity_type')|title }}</label>
+                        <input type="text" class="form-control" id="role_at_entity" name="role_at_entity" 
+                               placeholder="e.g., Account Manager, Sales Rep, CEO" 
+                               value="{{ request.args.get('role_at_entity', '') }}">
+                        <div class="form-text">Specify this contact's role or title at the {{ request.args.get('entity_type') }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-flex justify-content-between">
+                        {% if request.args.get('entity_type') and request.args.get('entity_id') %}
+                            {% set entity_type = request.args.get('entity_type') %}
+                            {% set entity_id = request.args.get('entity_id') %}
+                            {% if entity_type == 'organization' %}
+                                <a href="{{ url_for('accounts.organization_detail', org_id=entity_id) }}" class="btn btn-secondary">
+                                    <i data-feather="arrow-left" class="me-2"></i>Cancel
+                                </a>
+                            {% elif entity_type == 'individual' %}
+                                <a href="{{ url_for('accounts.individual_detail', individual_id=entity_id) }}" class="btn btn-secondary">
+                                    <i data-feather="arrow-left" class="me-2"></i>Cancel
+                                </a>
+                            {% elif entity_type == 'vendor' %}
+                                <a href="{{ url_for('vendors.vendor_detail', vendor_id=entity_id) }}" class="btn btn-secondary">
+                                    <i data-feather="arrow-left" class="me-2"></i>Cancel
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            <a href="{{ url_for('contacts.contacts') }}" class="btn btn-secondary">
+                                <i data-feather="arrow-left" class="me-2"></i>Cancel
+                            </a>
+                        {% endif %}
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i data-feather="{{ 'save' if contact else 'plus' }}" class="me-2"></i>
+                            {{ 'Update Contact' if contact else 'Create Contact' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Auto-Link Information -->
+{% if request.args.get('entity_type') and request.args.get('entity_id') %}
+<div class="row mt-4">
+    <div class="col-md-8 mx-auto">
+        <div class="alert alert-info">
+            <i data-feather="info" class="me-2"></i>
+            <strong>Auto-Link:</strong> This contact will be automatically linked to the selected {{ request.args.get('entity_type') }} 
+            with the specified role.
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Contact Requirements -->
+<div class="row mt-4">
+    <div class="col-md-8 mx-auto">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i data-feather="info" class="me-2"></i>
+                    Contact Requirements
+                </h6>
+                <ul class="small mb-0">
+                    <li>First name and last name are required</li>
+                    <li>At least one contact method (email or phone) should be provided</li>
+                    <li>Role information can be specified when linking contacts to organizations</li>
+                    <li>Notes can include additional context, preferences, or relationship details</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Phone number formatting
+function formatPhone(input) {
+    let value = input.value.replace(/\D/g, '');
+    if (value.length >= 6) {
+        value = value.replace(/(\d{3})(\d{3})(\d+)/, '($1) $2-$3');
+    } else if (value.length >= 3) {
+        value = value.replace(/(\d{3})(\d+)/, '($1) $2');
+    }
+    input.value = value;
+}
+
+document.getElementById('phone').addEventListener('input', function(e) {
+    formatPhone(e.target);
+});
+
+document.getElementById('mobile').addEventListener('input', function(e) {
+    formatPhone(e.target);
+});
+
+// Form validation feedback
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const firstNameInput = document.getElementById('first_name');
+    const lastNameInput = document.getElementById('last_name');
+    const emailInput = document.getElementById('email');
+    const phoneInput = document.getElementById('phone');
+    const mobileInput = document.getElementById('mobile');
+    
+    form.addEventListener('submit', function(e) {
+        let hasContactMethod = emailInput.value.trim() || phoneInput.value.trim() || mobileInput.value.trim();
+        
+        if (!hasContactMethod) {
+            e.preventDefault();
+            alert('Please provide at least one contact method (email or phone).');
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

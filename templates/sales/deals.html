@@ -1,0 +1,386 @@
+{% extends "base.html" %}
+
+{% block title %}Sales Deals - Valhalla Agency OS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2">
+                <i data-feather="trending-up" class="me-2"></i>
+                Sales Pipeline
+            </h1>
+            <a href="{{ url_for('sales.create_deal') }}" class="btn btn-primary">
+                <i data-feather="plus" class="me-2"></i>
+                New Deal
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Pipeline View Toggle -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-primary active" onclick="showKanban()">
+                            <i data-feather="columns" class="me-2"></i>Pipeline View
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" onclick="showTable()">
+                            <i data-feather="list" class="me-2"></i>Table View
+                        </button>
+                    </div>
+
+                    <!-- Filters -->
+                    <form method="GET" class="d-flex gap-2">
+                        <select name="stage" class="form-select form-select-sm">
+                            <option value="">All Stages</option>
+                            {% for value, label in stage_choices %}
+                                <option value="{{ value }}" {% if request.args.get('stage') == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <select name="owner" class="form-select form-select-sm">
+                            <option value="">All Owners</option>
+                            {% for user in users %}
+                                <option value="{{ user.id }}" {% if request.args.get('owner')|int == user.id %}selected{% endif %}>
+                                    {{ user.full_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-outline-secondary btn-sm">
+                            <i data-feather="filter"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Kanban Pipeline View -->
+<div class="row g-3" id="kanbanView">
+    {% for stage_code, stage_data in deals_by_stage.items() %}
+    <div class="col-md-2">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0 d-flex justify-content-between align-items-center">
+                    {{ stage_data.name }}
+                    <span class="badge bg-secondary">{{ stage_data.deals|length }}</span>
+                </h6>
+            </div>
+            <div class="card-body p-2">
+                {% for deal in stage_data.deals %}
+                <div class="card mb-2 deal-card" data-deal-id="{{ deal.id }}">
+                    <div class="card-body p-3">
+                        <h6 class="card-title mb-2">
+                            <a href="#" class="text-decoration-none" onclick="viewDeal({{ deal.id }})">
+                                {{ deal.name }}
+                            </a>
+                        </h6>
+                        <div class="mb-2">
+                            {% if deal.client_name != 'Prospective Client' %}
+                                <small class="text-muted">{{ deal.client_name }}</small>
+                            {% else %}
+                                <small class="text-muted">{{ deal.client_name }}</small>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                {% if deal.est_premium_value %}
+                                    ${{ "{:,.0f}".format(deal.est_premium_value) }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </small>
+                            <div class="avatar-circle-sm">
+                                {{ deal.owner.first_name[0] }}{{ deal.owner.last_name[0] }}
+                            </div>
+                        </div>
+                        {% if deal.est_close_date %}
+                        <div class="mt-2">
+                            <small class="text-muted">Due: {{ deal.est_close_date.strftime('%m/%d') }}</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+
+                {% if not stage_data.deals %}
+                <div class="text-center text-muted py-3">
+                    <i data-feather="inbox" style="width: 24px; height: 24px;"></i>
+                    <p class="mb-0 small">No deals</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Table View -->
+<div class="row" id="tableView" style="display: none;">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i data-feather="list" class="me-2"></i>
+                    All Deals ({{ deals.total }} total)
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                {% if deals.items %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Deal Name</th>
+                                <th>Client</th>
+                                <th>Stage</th>
+                                <th>Owner</th>
+                                <th>Estimated Revenue</th>
+                                <th>Est. Close Date</th>
+                                <th>Created</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for deal in deals.items %}
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">{{ deal.name }}</div>
+                                </td>
+                                <td>
+                                    {% if deal.client_name != 'Prospective Client' %}
+                                        <div>{{ deal.client_name }}</div>
+                                        <small class="text-muted">
+                                            {{ 'Organization' if deal.organization else 'Individual' }}
+                                        </small>
+                                    {% else %}
+                                        <span class="text-muted">Prospective Client</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% set stage_class = {
+                                        0: 'secondary',
+                                        1: 'info',
+                                        2: 'warning',
+                                        3: 'primary',
+                                        4: 'success',
+                                        5: 'dark'
+                                    } %}
+                                    <span class="badge bg-{{ stage_class.get(deal.stage, 'secondary') }}">
+                                        {{ deal.stage_name }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle-sm me-2">
+                                            {{ deal.owner.first_name[0] }}{{ deal.owner.last_name[0] }}
+                                        </div>
+                                        {{ deal.owner.full_name }}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if deal.estimated_annual_revenue %}
+                                        ${{ "{:,.2f}".format(deal.estimated_annual_revenue) }}
+                                        <small class="text-muted d-block">{{ deal.recurring }}</small>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if deal.est_close_date %}
+                                        {{ deal.est_close_date.strftime('%Y-%m-%d') }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        {{ deal.created_at.strftime('%Y-%m-%d') }}
+                                    </small>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary" onclick="viewDeal({{ deal.id }})" title="View Deal">
+                                            <i data-feather="eye"></i>
+                                        </button>
+                                        {% if deal.is_open %}
+                                        <a href="{{ url_for('sales.edit_deal', deal_id=deal.id) }}" 
+                                           class="btn btn-sm btn-outline-primary" title="Edit Deal">
+                                            <i data-feather="edit" class="me-1"></i>
+                                            Edit
+                                        </a>
+                                    {% elif deal.stage == 5 and deal.contact and not deal.contact.is_client %}
+                                        <a href="{{ url_for('sales.convert_deal', deal_id=deal.id) }}" 
+                                           class="btn btn-sm btn-success" title="Convert to Client">
+                                            <i data-feather="user-plus" class="me-1"></i>
+                                            Convert to Client
+                                        </a>
+                                    {% endif %}
+                                        <div class="btn-group btn-group-sm">
+                                            <button type="button" class="btn btn-outline-info dropdown-toggle" data-bs-toggle="dropdown" title="Change Stage">
+                                                <i data-feather="arrow-right"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                {% for value, label in stage_choices %}
+                                                    {% if value != deal.stage %}
+                                                    <li>
+                                                        <a class="dropdown-item" href="#" onclick="changeStage({{ deal.id }}, '{{ value }}')">
+                                                            {{ label }}
+                                                        </a>
+                                                    </li>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i data-feather="trending-up" class="text-muted mb-3" style="width: 48px; height: 48px;"></i>
+                    <h5 class="text-muted">No deals found</h5>
+                    <p class="text-muted">Create your first deal to get started.</p>
+                    <a href="{{ url_for('sales.create_deal') }}" class="btn btn-primary">
+                        <i data-feather="plus" class="me-2"></i>Create First Deal
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if deals.pages > 1 %}
+            <div class="card-footer">
+                <nav aria-label="Deals pagination">
+                    <ul class="pagination pagination-sm justify-content-center mb-0">
+                        {% if deals.has_prev %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('sales.deals', page=deals.prev_num, **request.args) }}">Previous</a>
+                            </li>
+                        {% endif %}
+
+                        {% for page_num in deals.iter_pages() %}
+                            {% if page_num %}
+                                {% if page_num != deals.page %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('sales.deals', page=page_num, **request.args) }}">{{ page_num }}</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ page_num }}</span>
+                                    </li>
+                                {% endif %}
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">…</span>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if deals.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('sales.deals', page=deals.next_num, **request.args) }}">Next</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Pipeline Stats -->
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <i data-feather="eye" class="mb-2" style="width: 32px; height: 32px;"></i>
+                <h4>{{ deals_by_stage.get('lead', {}).get('deals', [])|length + deals_by_stage.get('discovery', {}).get('deals', [])|length }}</h4>
+                <p class="mb-0">Active Pipeline</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <i data-feather="file-text" class="mb-2" style="width: 32px; height: 32px;"></i>
+                <h4>{{ deals_by_stage.get('proposal', {}).get('deals', [])|length }}</h4>
+                <p class="mb-0">Proposals Out</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <i data-feather="check-circle" class="mb-2" style="width: 32px; height: 32px;"></i>
+                <h4>{{ deals_by_stage.get('verbal_yes', {}).get('deals', [])|length }}</h4>
+                <p class="mb-0">Verbal Commitments</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <i data-feather="dollar-sign" class="mb-2" style="width: 32px; height: 32px;"></i>
+                <h4>{{ deals_by_stage.get('closed_won', {}).get('deals', [])|length }}</h4>
+                <p class="mb-0">Closed Won</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showKanban() {
+    document.getElementById('kanbanView').style.display = 'block';
+    document.getElementById('tableView').style.display = 'none';
+
+    // Update button states
+    document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+}
+
+function showTable() {
+    document.getElementById('kanbanView').style.display = 'none';
+    document.getElementById('tableView').style.display = 'block';
+
+    // Update button states
+    document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+}
+
+function viewDeal(dealId) {
+    // For now, redirect to edit - in future could be a modal detail view
+    window.location.href = `{{ url_for('sales.edit_deal', deal_id=0) }}`.replace('0', dealId);
+}
+
+function changeStage(dealId, newStage) {
+    if (confirm('Change deal stage?')) {
+        fetch(`{{ url_for('sales.update_deal_stage', deal_id=0) }}`.replace('0', dealId), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `stage=${newStage}`
+        }).then(() => {
+            location.reload();
+        });
+    }
+}
+
+// Make cards draggable in the future
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize drag and drop here if needed
+});
+</script>
+{% endblock %}

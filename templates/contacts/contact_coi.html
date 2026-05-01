@@ -1,0 +1,109 @@
+
+{% extends "base.html" %}
+
+{% block title %}COI Records - {{ contact.full_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>COI Records - {{ contact.full_name }}</h2>
+                <div>
+                    <a href="{{ url_for('contacts.create_coi') }}" class="btn btn-primary me-2">
+                        <i data-feather="plus" class="me-2"></i>New COI Record
+                    </a>
+                    <a href="{{ url_for('contacts.contact_detail', contact_id=contact.id) }}" class="btn btn-outline-secondary">
+                        <i data-feather="arrow-left" class="me-2"></i>Back to Contact
+                    </a>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    {% if coi_records %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Category</th>
+                                        <th>Explanation</th>
+                                        <th>Notes</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for coi in coi_records %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-primary">
+                                                {% if coi.category == 'greek_organization' %}
+                                                    Greek Organization
+                                                {% else %}
+                                                    {{ coi.category.replace('_', ' ').title() }}
+                                                {% endif %}
+                                            </span>
+                                        </td>
+                                        <td>{{ coi.explanation or '-' }}</td>
+                                        <td>{{ coi.notes or '-' }}</td>
+                                        <td>
+                                            {% if coi.status == 'active' %}
+                                                <span class="badge bg-success">Active</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ coi.created_at.strftime('%m/%d/%Y') }}</td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{{ url_for('contacts.edit_coi', coi_id=coi.id) }}" 
+                                                   class="btn btn-outline-secondary" title="Edit">
+                                                    <i data-feather="edit"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-outline-danger" 
+                                                        title="Delete"
+                                                        onclick="deleteCOI({{ coi.id }}, '{{ coi.explanation }}')">
+                                                    <i data-feather="trash-2"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i data-feather="alert-circle" class="text-muted mb-3" style="width: 48px; height: 48px;"></i>
+                            <h5 class="text-muted">No COI records found</h5>
+                            <p class="text-muted">Create the first COI record for this contact.</p>
+                            <a href="{{ url_for('contacts.create_coi') }}" class="btn btn-primary">
+                                <i data-feather="plus" class="me-2"></i>New COI Record
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function deleteCOI(coiId, explanation) {
+    if (confirm(`Are you sure you want to delete the COI record "${explanation}"?`)) {
+        fetch(`/contacts/coi/${coiId}/delete`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token() }}'
+            }
+        }).then(response => {
+            if (response.ok) {
+                location.reload();
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

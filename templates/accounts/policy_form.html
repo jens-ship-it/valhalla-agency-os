@@ -1,0 +1,378 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit Policy' if policy else 'New Policy' }} - Valhalla Agency OS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i data-feather="{{ 'edit' if policy else 'plus' }}" class="me-2"></i>
+                    {{ 'Edit' if policy else 'New' }} {{ 'Group' if policy_type == 'group' else 'Individual' }} Policy
+                </h4>
+                <div class="text-muted">
+                    {{ entity.name or entity.full_name }}
+                </div>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <!-- Basic Policy Information -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.carrier_id.label(class="form-label") }}
+                            {{ form.carrier_id(class="form-select" + (" is-invalid" if form.carrier_id.errors else "")) }}
+                            {% if form.carrier_id.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.carrier_id.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.product_type.label(class="form-label") }}
+                            {{ form.product_type(class="form-select" + (" is-invalid" if form.product_type.errors else "")) }}
+                            {% if form.product_type.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.product_type.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.policy_number.label(class="form-label") }}
+                            {{ form.policy_number(class="form-control" + (" is-invalid" if form.policy_number.errors else "")) }}
+                            {% if form.policy_number.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.policy_number.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.status.label(class="form-label") }}
+                            {{ form.status(class="form-select" + (" is-invalid" if form.status.errors else "")) }}
+                            {% if form.status.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.status.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Dates -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.effective_date.label(class="form-label") }}
+                            {{ form.effective_date(class="form-control" + (" is-invalid" if form.effective_date.errors else "")) }}
+                            {% if form.effective_date.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.effective_date.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if policy_type == 'group' %}
+                        <div class="col-md-6 mb-3">
+                            {{ form.renewal_date.label(class="form-label") }}
+                            {{ form.renewal_date(class="form-control" + (" is-invalid" if form.renewal_date.errors else "")) }}
+                            {% if form.renewal_date.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.renewal_date.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Group Policy Specific Fields -->
+                    {% if policy_type == 'group' %}
+                    <div class="mb-3">
+                        {{ form.funding.label(class="form-label") }}
+                        {{ form.funding(class="form-select" + (" is-invalid" if form.funding.errors else "")) }}
+                        {% if form.funding.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.funding.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.estimated_monthly_revenue.label(class="form-label") }}
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            {{ form.estimated_monthly_revenue(class="form-control" + (" is-invalid" if form.estimated_monthly_revenue.errors else "")) }}
+                        </div>
+                        {% if form.estimated_monthly_revenue.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.estimated_monthly_revenue.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">Expected monthly revenue from this group policy</div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Individual Policy Specific Fields -->
+                    {% if policy_type == 'individual' %}
+                    <div class="mb-3">
+                        {{ form.face_amount.label(class="form-label") }}
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            {{ form.face_amount(class="form-control" + (" is-invalid" if form.face_amount.errors else ""), placeholder="e.g., 2000000") }}
+                        </div>
+                        {% if form.face_amount.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.face_amount.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="form-text">Enter amount without commas (e.g., 2000000 for $2M)</div>
+                    </div>
+                    
+                    <!-- Corporate Relationship Fields -->
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.is_corporate_related(class="form-check-input", id="is_corporate_related") }}
+                            {{ form.is_corporate_related.label(class="form-check-label") }}
+                        </div>
+                        <div class="form-text">Check if this policy is related to a corporate entity</div>
+                    </div>
+                    
+                    <div id="corporate_fields" class="mb-3" style="display: none;">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                {{ form.corporate_entity_id.label(class="form-label mb-0") }}
+                                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#quickAddCorporateModal">
+                                    <i data-feather="plus-circle" class="feather-sm me-1"></i>Create New
+                                </button>
+                            </div>
+                            {{ form.corporate_entity_id(class="form-select" + (" is-invalid" if form.corporate_entity_id.errors else ""), id="corporate_entity_select") }}
+                            {% if form.corporate_entity_id.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.corporate_entity_id.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.corporate_explanation.label(class="form-label") }}
+                            {{ form.corporate_explanation(class="form-control" + (" is-invalid" if form.corporate_explanation.errors else ""), placeholder="e.g., COLI, ICHRA, Split Dollar") }}
+                            {% if form.corporate_explanation.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.corporate_explanation.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Type of corporate relationship (COLI, ICHRA, etc.)</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Notes -->
+                    <div class="mb-4">
+                        {{ form.notes.label(class="form-label") }}
+                        {{ form.notes(class="form-control", rows="4") }}
+                        {% if form.notes.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.notes.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        {% if policy_type == 'group' %}
+                            <a href="{{ url_for('accounts.organization_detail', org_id=entity.id) }}" class="btn btn-secondary">
+                                <i data-feather="arrow-left" class="me-2"></i>
+                                Cancel
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('accounts.individual_detail', individual_id=entity.id) }}" class="btn btn-secondary">
+                                <i data-feather="arrow-left" class="me-2"></i>
+                                Cancel
+                            </a>
+                        {% endif %}
+                        <button type="submit" class="btn btn-primary">
+                            <i data-feather="{{ 'save' if policy else 'plus' }}" class="me-2"></i>
+                            {{ 'Update Policy' if policy else 'Create Policy' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Policy Information Card -->
+<div class="row mt-4">
+    <div class="col-md-8 mx-auto">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i data-feather="info" class="me-2"></i>
+                    Policy Information
+                </h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <small class="text-muted">Policy Type:</small>
+                        <div>{{ 'Group Policy' if policy_type == 'group' else 'Individual Policy' }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted">Client:</small>
+                        <div>{{ entity.name if entity.name else entity.full_name }}</div>
+                    </div>
+                </div>
+                
+                {% if policy_type == 'group' %}
+                <div class="mt-2">
+                    <small class="text-muted">
+                        Group policies are associated with organizations and cover multiple employees or members.
+                        Funding options include fully insured and ASO (Administrative Services Only).
+                    </small>
+                </div>
+                {% else %}
+                <div class="mt-2">
+                    <small class="text-muted">
+                        Individual policies are personal insurance policies for specific individuals.
+                        Face amount represents the policy benefit or coverage amount.
+                    </small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Add Corporate Entity Modal -->
+<div class="modal fade" id="quickAddCorporateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Quick Add Corporate Entity</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="quickAddCorporateForm">
+                    <div class="mb-3">
+                        <label for="quickCorpName" class="form-label">Company Name *</label>
+                        <input type="text" class="form-control" id="quickCorpName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="quickCorpIndustry" class="form-label">Industry</label>
+                        <input type="text" class="form-control" id="quickCorpIndustry" name="industry">
+                    </div>
+                    <div class="row">
+                        <div class="col-8 mb-3">
+                            <label for="quickCorpCity" class="form-label">City</label>
+                            <input type="text" class="form-control" id="quickCorpCity" name="city">
+                        </div>
+                        <div class="col-4 mb-3">
+                            <label for="quickCorpState" class="form-label">State</label>
+                            <input type="text" class="form-control" id="quickCorpState" name="state" maxlength="2">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="quickAddCorporateSave">Save Entity</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Individual policy specific functionality
+{% if policy_type == 'individual' %}
+document.addEventListener('DOMContentLoaded', function() {
+    // Corporate fields toggle
+    const corporateCheckbox = document.getElementById('is_corporate_related');
+    const corporateFields = document.getElementById('corporate_fields');
+    
+    if (corporateCheckbox && corporateFields) {
+        function toggleCorporateFields() {
+            if (corporateCheckbox.checked) {
+                corporateFields.style.display = 'block';
+            } else {
+                corporateFields.style.display = 'none';
+            }
+        }
+        
+        // Set initial state
+        toggleCorporateFields();
+        
+        // Add event listener
+        corporateCheckbox.addEventListener('change', toggleCorporateFields);
+    }
+    
+    // Quick add corporate entity
+    const quickAddSaveBtn = document.getElementById('quickAddCorporateSave');
+    if (quickAddSaveBtn) {
+        quickAddSaveBtn.addEventListener('click', function() {
+            const formData = new FormData(document.getElementById('quickAddCorporateForm'));
+            
+            // Get CSRF token from the main form
+            const csrfToken = document.querySelector('input[name="csrf_token"]');
+            if (csrfToken) {
+                formData.append('csrf_token', csrfToken.value);
+            }
+            
+            fetch('/accounts/api/entities/quick-add', {
+                method: 'POST',
+                body: formData
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                
+                // Add to dropdown
+                const select = document.getElementById('corporate_entity_select');
+                const option = new Option(data.name + (data.city ? ` (${data.city}, ${data.state})` : ''), data.id);
+                select.add(option);
+                select.value = data.id;
+                
+                // Close modal and clear form
+                bootstrap.Modal.getInstance(document.getElementById('quickAddCorporateModal')).hide();
+                document.getElementById('quickAddCorporateForm').reset();
+            })
+            .catch(err => {
+                alert('Error creating entity: ' + err.message);
+            });
+        });
+    }
+});
+{% endif %}
+
+// Product type descriptions
+const productDescriptions = {
+    {% if policy_type == 'group' %}
+    medical: 'Health insurance coverage for employees',
+    dental: 'Dental insurance coverage',
+    vision: 'Vision insurance coverage',
+    life: 'Group life insurance',
+    std: 'Short-term disability insurance',
+    ltd: 'Long-term disability insurance',
+    other: 'Other group insurance products'
+    {% else %}
+    life: 'Individual life insurance policy',
+    di: 'Disability insurance coverage',
+    ltc: 'Long-term care insurance',
+    annuity: 'Annuity contract',
+    other: 'Other individual insurance products'
+    {% endif %}
+};
+
+document.getElementById('product_type').addEventListener('change', function(e) {
+    const description = productDescriptions[e.target.value];
+    if (description) {
+        // Could add a description tooltip or help text
+        console.log('Product type:', description);
+    }
+});
+</script>
+{% endblock %}

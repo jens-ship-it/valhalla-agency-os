@@ -1,0 +1,438 @@
+/* Valhalla Agency OS Custom Styles - Professional Color Scheme */
+
+:root {
+    --valhalla-primary: #2c3e50;
+    --valhalla-secondary: #34495e;
+    --valhalla-accent: #3498db;
+    --valhalla-muted: #7f8c8d;
+    --valhalla-success: #27ae60;
+    --valhalla-warning: #f39c12;
+    --valhalla-danger: #e74c3c;
+    --valhalla-dark: #1a252f;
+    --valhalla-light: #ecf0f1;
+}
+
+/* Avatar Circles */
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--valhalla-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 0.875rem;
+}
+
+.avatar-circle-sm {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--valhalla-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 0.75rem;
+}
+
+/* Status and Priority Badges */
+.badge {
+    font-size: 0.75em;
+}
+
+/* Contact Tags */
+.contact-tag .badge {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+}
+
+.contact-tag .btn-close {
+    font-size: 0.6rem;
+    margin-left: 0.25rem;
+}
+
+/* Notes Styling */
+.notes-list .note-item {
+    background: var(--valhalla-dark);
+    border: 1px solid var(--valhalla-secondary);
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.notes-list .note-item:last-child {
+    margin-bottom: 0;
+}
+
+/* Table Enhancements */
+.table-hover tbody tr:hover {
+    background-color: var(--valhalla-dark) !important;
+}
+
+.table-dark {
+    --bs-table-bg: var(--valhalla-dark);
+    --bs-table-border-color: var(--valhalla-secondary);
+}
+
+.table-dark thead th {
+    background-color: var(--valhalla-secondary) !important;
+    border-color: var(--valhalla-secondary) !important;
+    color: var(--valhalla-light) !important;
+}
+
+/* Ensure all table headers use dark styling */
+.table thead th,
+thead th {
+    background-color: var(--valhalla-secondary) !important;
+    border-color: var(--valhalla-secondary) !important;
+    color: var(--valhalla-light) !important;
+}
+
+/* Override Bootstrap's default table header styling */
+.table > :not(caption) > * > * {
+    background-color: var(--valhalla-dark);
+    border-bottom-color: var(--valhalla-secondary);
+}
+
+.table > thead {
+    background-color: var(--valhalla-secondary) !important;
+}
+
+/* Card Enhancements */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid var(--bs-border-color);
+}
+
+.card-header {
+    background-color: var(--bs-light);
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+/* Special styling for dark cards to ensure visibility */
+.card.border-dark {
+    border: 2px solid var(--valhalla-secondary) !important;
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
+}
+
+.card-header.bg-dark {
+    background-color: var(--valhalla-secondary) !important;
+    border-bottom: 1px solid var(--valhalla-accent);
+}
+
+/* Button Groups */
+.btn-group-sm > .btn, .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+/* Form Enhancements */
+.form-control:focus {
+    border-color: var(--valhalla-accent);
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.15);
+}
+
+.form-select:focus {
+    border-color: var(--valhalla-accent);
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.15);
+}
+
+/* Search Form Styling */
+.search-form {
+    background: var(--valhalla-dark);
+    border: 1px solid var(--valhalla-secondary);
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Pagination Styling */
+.pagination {
+    --bs-pagination-padding-x: 0.75rem;
+    --bs-pagination-padding-y: 0.375rem;
+}
+
+/* Alert Styling */
+.alert {
+    border: none;
+    border-radius: 0.5rem;
+}
+
+/* Navigation Enhancements */
+.navbar-brand {
+    font-size: 1.25rem;
+    color: var(--valhalla-light) !important;
+}
+
+.navbar-nav .nav-link {
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    margin: 0 0.125rem;
+    transition: background-color 0.15s ease-in-out;
+    color: #bdc3c7 !important;
+}
+
+.navbar-nav .nav-link:hover {
+    background-color: var(--valhalla-secondary);
+    color: white !important;
+}
+
+/* Footer Styling */
+footer {
+    border-top: 1px solid var(--bs-border-color);
+}
+
+/* Priority and Status Colors */
+.text-priority-urgent {
+    color: var(--valhalla-danger) !important;
+}
+
+.text-priority-high {
+    color: var(--valhalla-warning) !important;
+}
+
+.text-priority-normal {
+    color: var(--valhalla-accent) !important;
+}
+
+.text-priority-low {
+    color: var(--valhalla-muted) !important;
+}
+
+/* Professional Card Styling */
+.card {
+    background-color: var(--valhalla-dark);
+    border: 1px solid var(--valhalla-secondary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Ensure light cards have proper dark background */
+.card.bg-light {
+    background-color: var(--valhalla-dark) !important;
+    color: var(--valhalla-light) !important;
+}
+
+.card-header {
+    background-color: var(--valhalla-secondary);
+    border-bottom: 1px solid var(--valhalla-primary);
+    color: var(--valhalla-light);
+}
+
+/* Professional Button Styling */
+.btn-primary {
+    background-color: var(--valhalla-accent);
+    border-color: var(--valhalla-accent);
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+    border-color: #2980b9;
+}
+
+.btn-outline-primary {
+    color: var(--valhalla-accent);
+    border-color: var(--valhalla-accent);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--valhalla-accent);
+    border-color: var(--valhalla-accent);
+}
+
+/* Loading States */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* HTMX Indicators */
+.htmx-indicator {
+    opacity: 0;
+    transition: opacity 500ms ease-in;
+}
+
+.htmx-request .htmx-indicator {
+    opacity: 1;
+}
+
+.htmx-request.htmx-indicator {
+    opacity: 1;
+}
+
+/* Contact Search Results */
+.contact-search-result {
+    padding: 0.5rem;
+    border: 1px solid var(--valhalla-secondary);
+    background-color: var(--valhalla-dark);
+    border-radius: 0.25rem;
+    margin-bottom: 0.25rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.contact-search-result:hover {
+    background-color: var(--valhalla-secondary);
+}
+
+/* Dashboard Cards */
+.dashboard-card {
+    transition: transform 0.15s ease-in-out;
+    background-color: var(--valhalla-dark);
+    border: 1px solid var(--valhalla-secondary);
+}
+
+.dashboard-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--valhalla-accent);
+}
+
+/* Login Form Responsive Centering */
+@media (max-width: 768px) {
+    .container-fluid .row {
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+
+    .container-fluid .col-md-6.col-lg-4 {
+        max-width: 100%;
+        padding: 1rem;
+    }
+}
+
+/* Responsive Enhancements */
+@media (max-width: 768px) {
+    .btn-group-sm > .btn {
+        padding: 0.125rem 0.25rem;
+        font-size: 0.75rem;
+    }
+
+    .avatar-circle {
+        width: 32px;
+        height: 32px;
+        font-size: 0.75rem;
+    }
+
+    .avatar-circle-sm {
+        width: 24px;
+        height: 24px;
+        font-size: 0.625rem;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .btn, .btn-group, .pagination, .navbar, footer {
+        display: none !important;
+    }
+
+    .card {
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+    }
+
+    .table {
+        font-size: 0.875rem;
+    }
+}
+
+/* Professional Theme Adjustments */
+[data-bs-theme="dark"] .notes-list .note-item {
+    background: var(--valhalla-dark);
+    border-color: var(--valhalla-secondary);
+}
+
+[data-bs-theme="dark"] .search-form {
+    background: var(--valhalla-dark);
+}
+
+[data-bs-theme="dark"] .contact-search-result:hover {
+    background-color: var(--valhalla-secondary);
+}
+
+/* Status Timeline */
+.status-timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.status-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.5rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--valhalla-secondary);
+}
+
+.status-timeline-item {
+    position: relative;
+    padding-bottom: 1rem;
+}
+
+.status-timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -0.75rem;
+    top: 0.25rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    background: var(--valhalla-accent);
+    border: 2px solid var(--valhalla-dark);
+}
+
+/* Badge and Status Improvements */
+.badge {
+    font-weight: 500;
+}
+
+.badge.bg-primary {
+    background-color: var(--valhalla-accent) !important;
+}
+
+.badge.bg-success {
+    background-color: var(--valhalla-success) !important;
+}
+
+.badge.bg-warning {
+    background-color: var(--valhalla-warning) !important;
+    color: #fff !important;
+}
+
+.badge.bg-danger {
+    background-color: var(--valhalla-danger) !important;
+}
+
+.badge.bg-secondary {
+    background-color: var(--valhalla-muted) !important;
+}
+
+/* Custom Scrollbar */
+.scrollable-content {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.scrollable-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scrollable-content::-webkit-scrollbar-track {
+    background: var(--bs-light);
+    border-radius: 4px;
+}
+
+.scrollable-content::-webkit-scrollbar-thumb {
+    background: var(--bs-secondary);
+    border-radius: 4px;
+}
+
+.scrollable-content::-webkit-scrollbar-thumb:hover {
+    background: var(--bs-primary);
+}

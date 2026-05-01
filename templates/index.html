@@ -1,0 +1,684 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Valhalla Agency OS{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <img src="{{ url_for('static', filename='images/valhalla-logo.png') }}" alt="Valhalla Agency" class="me-2" style="width: 40px; height: 40px;">
+                    Admin Tools Dashboard
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <span class="badge bg-success">{{ current_user.full_name }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tool Categories Grid -->
+            <div class="row g-4">
+                <!-- User Management -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-primary">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="card-title mb-0">
+                                <i data-feather="users" class="me-2"></i>
+                                User Management
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">Manage users, roles, and permissions</p>
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('admin.users') }}" class="btn btn-outline-primary btn-sm">Manage Users</a>
+                                <a href="{{ url_for('admin.roles') }}" class="btn btn-outline-primary btn-sm">Manage Roles</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Management -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-info">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="card-title mb-0">
+                                <i data-feather="briefcase" class="me-2"></i>
+                                Account Management
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text text-muted">Corporate and individual client management</p>
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('accounts.corporate_clients') }}" class="btn btn-outline-primary">
+                                    <i data-feather="briefcase" class="me-2"></i>Corporate Clients
+                                </a>
+                                <a href="{{ url_for('accounts.individuals') }}" class="btn btn-outline-primary">
+                                    <i data-feather="user" class="me-2"></i>Individual Clients
+                                </a>
+                                <a href="{{ url_for('policies.policies') }}" class="btn btn-outline-primary">
+                                    <i data-feather="shield" class="me-2"></i>Policies and Contracts
+                                </a>
+                                <a href="{{ url_for('vendors.vendors') }}" class="btn btn-outline-primary">
+                                    <i data-feather="briefcase" class="me-2"></i>Vendors
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sales Pipeline -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-success">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="card-title mb-0">
+                                <i data-feather="trending-up" class="me-2"></i>
+                                Sales Pipeline
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">Track deals, opportunities, and sales reports</p>
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('sales.deals') }}" class="btn btn-outline-success btn-sm">View Deals</a>
+                                <a href="{{ url_for('sales.prospect_view') }}" class="btn btn-outline-success btn-sm">Prospect View</a>
+                                <a href="#" class="btn btn-outline-success btn-sm" onclick="showComingSoon()">Sales Reports</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Underwriting Pipeline -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-warning">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="card-title mb-0">
+                                <i data-feather="file-text" class="me-2"></i>
+                                Underwriting Pipeline
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">Policy applications and underwriting workflow</p>
+                            <div class="d-grid gap-2">
+                                <a href="#" class="btn btn-outline-warning btn-sm" onclick="showComingSoon()">Applications</a>
+                                <a href="#" class="btn btn-outline-warning btn-sm" onclick="showComingSoon()">Policy Reviews</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Tools -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-secondary">
+                        <div class="card-header bg-secondary text-white">
+                            <h5 class="card-title mb-0">
+                                <i data-feather="dollar-sign" class="me-2"></i>
+                                Financial Tools
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">Revenue tracking, commissions, and financial reports</p>
+                            <div class="d-grid gap-2">
+                                <a href="#" class="btn btn-outline-secondary btn-sm" onclick="showComingSoon()">Revenue Reports</a>
+                                <a href="#" class="btn btn-outline-secondary btn-sm" onclick="showComingSoon()">Commission Tracking</a>
+                                <a href="#" class="btn btn-outline-secondary btn-sm" onclick="showComingSoon()">Production Accounting Wizard</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Marketing Tools -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-info">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="card-title mb-0">
+                                <i data-feather="target" class="me-2"></i>
+                                Marketing Analytics
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">Market analysis and distribution reporting tools</p>
+                            <div class="d-grid gap-2">
+                                <a href="#" class="btn btn-outline-info btn-sm" onclick="showComingSoon()">Market Segment Report</a>
+                                <a href="#" class="btn btn-outline-info btn-sm" onclick="showComingSoon()">Distribution Source Report</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Group RFP Wizard -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-warning">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="card-title mb-0">
+                                <i data-feather="file-text" class="me-2"></i>
+                                Group RFP Wizard
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">Create and manage Request for Proposal documents for group benefits</p>
+                            <div class="d-grid gap-2">
+                                <a href="#" class="btn btn-outline-warning btn-sm" onclick="showComingSoon()">Create New RFP</a>
+                                <a href="#" class="btn btn-outline-warning btn-sm" onclick="showComingSoon()">Manage Existing RFP</a>
+                                <a href="#" class="btn btn-outline-warning btn-sm" onclick="showComingSoon()">RFP Templates</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Database Management -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-secondary">
+                        <div class="card-header bg-secondary text-white">
+                            <h5 class="card-title mb-0">
+                                <i data-feather="database" class="me-2"></i>
+                                Database Management
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">Manage contacts, entities, and review database structure</p>
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('contacts.contacts') }}" class="btn btn-outline-secondary btn-sm">Contacts</a>
+                                <a href="{{ url_for('accounts.organizations') }}" class="btn btn-outline-secondary btn-sm">Organizations</a>
+                                <a href="#" class="btn btn-outline-secondary btn-sm" onclick="showDatabaseSchema()">Database Review</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Valhalla Resources -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-dark">
+                        <div class="card-header bg-dark text-white">
+                            <h5 class="card-title mb-0">
+                                <i data-feather="book" class="me-2"></i>
+                                Valhalla Resources
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">Analytics and regulatory tools for business development</p>
+                            <div class="d-grid gap-2">
+                                <a href="#" class="btn btn-outline-dark btn-sm" onclick="showComingSoon()">5500 Analytics powered by DOL EBSA</a>
+                                <a href="#" class="btn btn-outline-dark btn-sm" onclick="showComingSoon()">Bank Tools powered by FDIC</a>
+                                <a href="#" class="btn btn-outline-dark btn-sm" onclick="showComingSoon()">Credit Union Tools powered by NCUA</a>
+                                <a href="#" class="btn btn-outline-dark btn-sm" onclick="showComingSoon()">Small Business Analytics powered by SBA</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-12">
+                    <div class="card border-danger">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="card-title mb-0">
+                                <i data-feather="zap" class="me-2"></i>
+                                Quick Links
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Role-based Quick Actions -->
+                                {% if current_user.has_any_role('sales', 'admin') %}
+                                <div class="col-md-4">
+                                    <h6 class="text-muted">Quick Actions</h6>
+                                    <div class="d-grid gap-2">
+                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="addOpportunityNote()">
+                                            <i data-feather="plus-circle" class="me-1"></i>Add Opportunity Note
+                                        </button>
+                                        <a href="{{ url_for('sales.create_deal') }}" class="btn btn-outline-danger btn-sm">
+                                            <i data-feather="trending-up" class="me-1"></i>Create Deal
+                                        </a>
+                                        {% if current_user.has_any_role('account_mgmt', 'admin') %}
+                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="addClientNote()">
+                                            <i data-feather="edit-3" class="me-1"></i>Add Client Note
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <!-- Service Actions -->
+                                {% if current_user.has_any_role('service', 'admin') %}
+                                <div class="col-md-4">
+                                    <h6 class="text-muted">Service Actions</h6>
+                                    <div class="d-grid gap-2">
+                                        <a href="{{ url_for('service.create_ticket') }}" class="btn btn-outline-danger btn-sm">
+                                            <i data-feather="clipboard" class="me-1"></i>Create Ticket
+                                        </a>
+                                        <a href="{{ url_for('service.tickets') }}" class="btn btn-outline-danger btn-sm">
+                                            <i data-feather="list" class="me-1"></i>View All Tickets
+                                        </a>
+                                        <a href="{{ url_for('service.reports') }}" class="btn btn-outline-danger btn-sm">
+                                            <i data-feather="bar-chart-2" class="me-1"></i>Service Reports
+                                        </a>
+                                    </div>
+                                </div>
+                                {% endif %}
+
+                                <!-- Workflows -->
+                                {% if current_user.has_any_role('service', 'account_mgmt', 'admin') %}
+                                <div class="col-md-4">
+                                    <h6 class="text-muted">Workflows</h6>
+                                    <div class="d-grid gap-2">
+                                        {% if current_user.has_any_role('service', 'admin') %}
+                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="initiateWorkflow()">
+                                            <i data-feather="play-circle" class="me-1"></i>Initiate Workflow
+                                        </button>
+                                        {% endif %}
+                                        {% if current_user.has_any_role('account_mgmt', 'admin') %}
+                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="showOnboardingWorkflow()">
+                                            <i data-feather="user-plus" class="me-1"></i>New Employee Setup
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="showOffboardingWorkflow()">
+                                            <i data-feather="user-minus" class="me-1"></i>Employee Termination
+                                        </button>
+                                        {% endif %}
+                                        {% if current_user.has_any_role('admin') %}
+                                        <a href="#" class="btn btn-outline-danger btn-sm" onclick="showComingSoon()">
+                                            <i data-feather="settings" class="me-1"></i>Manage Workflows
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Workflow Initiation Modal -->
+<div class="modal fade" id="workflowModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Initiate Client Workflow</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="workflowClient" class="form-label">Select Client</label>
+                        <select class="form-select" id="workflowClient" onchange="loadClientWorkflows()">
+                            <option value="">Choose a client...</option>
+                            <!-- Populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="workflowType" class="form-label">Workflow Type</label>
+                        <select class="form-select" id="workflowType" disabled onchange="showWorkflowDetails()">
+                            <option value="">Select workflow type...</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="workflowDetails" class="mt-3" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">Workflow Steps</h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="workflowSteps">
+                                <!-- Steps populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="startWorkflowBtn" onclick="startWorkflow()" disabled>Start Workflow</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Opportunity Note Modal -->
+<div class="modal fade" id="opportunityNoteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Opportunity Note</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="opportunitySelect" class="form-label">Sales Opportunity</label>
+                    <select class="form-select" id="opportunitySelect">
+                        <option value="">Select an opportunity...</option>
+                        <!-- Populated by JavaScript -->
+                    </select>
+                    <div class="form-text">Choose an existing sales opportunity to add a note to</div>
+                </div>
+                <div class="mb-3" id="opportunityDetails" style="display: none;">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <small class="text-muted">
+                                <strong>Client:</strong> <span id="selectedOpportunityClient"></span><br>
+                                <strong>Stage:</strong> <span id="selectedOpportunityStage"></span><br>
+                                <strong>Owner:</strong> <span id="selectedOpportunityOwner"></span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="opportunityNote" class="form-label">Note</label>
+                    <textarea class="form-control" id="opportunityNote" rows="4" placeholder="Enter progress update, next steps, client feedback, etc..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveOpportunityNote()">Save Note</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Client Note Modal -->
+<div class="modal fade" id="clientNoteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Client Note</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="clientNoteForm">
+                    <div class="mb-3">
+                        <label for="clientSelect" class="form-label">Select Client</label>
+                        <select class="form-select" id="clientSelect" required>
+                            <option value="">Choose client...</option>
+                            <!-- Options will be loaded dynamically -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="clientNoteText" class="form-label">Note</label>
+                        <textarea class="form-control" id="clientNoteText" rows="4" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveClientNote()">Save Note</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Database Schema Modal -->
+<div class="modal fade" id="databaseSchemaModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Database Schema Review</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12">
+                        <h6>Core Tables</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Table</th>
+                                        <th>Description</th>
+                                        <th>Key Relationships</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code>entity</code></td>
+                                        <td>Organizations and vendors</td>
+                                        <td>→ contact_links, group_policies, service_tickets</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>contact</code></td>
+                                        <td>Universal contact management</td>
+                                        <td>→ contact_links, service_tickets, deals, coi_records</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>contact_link</code></td>
+                                        <td>Links contacts to entities</td>
+                                        <td>contact ↔ entity</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>client</code></td>
+                                        <td>Client-specific data for contacts</td>
+                                        <td>→ contact, individual_policies</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>user</code></td>
+                                        <td>System users and staff</td>
+                                        <td>→ roles, service_tickets, deals</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>role</code></td>
+                                        <td>User roles and permissions</td>
+                                        <td>↔ users (many-to-many)</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>service_ticket</code></td>
+                                        <td>Service requests and issues</td>
+                                        <td>→ users, contacts, entities</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>group_policy</code></td>
+                                        <td>Group insurance policies</td>
+                                        <td>→ entity</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>individual_policy</code></td>
+                                        <td>Individual insurance policies</td>
+                                        <td>→ client</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>deal</code></td>
+                                        <td>Sales opportunities</td>
+                                        <td>→ contact, entity, user</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>coi</code></td>
+                                        <td>Center of Influence records</td>
+                                        <td>→ contact, user</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>vendor_detail</code></td>
+                                        <td>Vendor-specific information</td>
+                                        <td>→ entity</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>distribution</code></td>
+                                        <td>Broker-client relationships</td>
+                                        <td>client_entity ↔ broker_entity</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <h6 class="mt-4">Key Design Patterns</h6>
+                        <ul>
+                            <li><strong>Unified Entity Model:</strong> Organizations and vendors share the same base table with vendor-specific details in a separate table</li>
+                            <li><strong>Contact Links:</strong> Flexible many-to-many relationship between contacts and entities with role information</li>
+                            <li><strong>Polymorphic Service Tickets:</strong> Can be linked to either organizations or individual clients</li>
+                            <li><strong>Role-Based Access:</strong> Users have multiple roles that control system access</li>
+                            <li><strong>Client Hierarchy:</strong> Contacts can have optional client records for insurance-specific data</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize Feather icons
+    feather.replace();
+
+    function showComingSoon() {
+        alert('This feature is coming soon!');
+    }
+
+    function addOpportunityNote() {
+        // Load opportunities and show modal
+        loadOpportunities();
+        var modal = new bootstrap.Modal(document.getElementById('opportunityNoteModal'));
+        modal.show();
+    }
+
+    function addClientNote() {
+        // Load clients and show modal
+        loadClients();
+        var modal = new bootstrap.Modal(document.getElementById('clientNoteModal'));
+        modal.show();
+    }
+
+    function loadOpportunities() {
+        // TODO: Load opportunities via AJAX
+        document.getElementById('opportunitySelect').innerHTML = '<option value="">No opportunities found</option>';
+    }
+
+    function loadClients() {
+        // TODO: Load clients via AJAX
+        document.getElementById('clientSelect').innerHTML = '<option value="">No clients found</option>';
+    }
+
+    function saveOpportunityNote() {
+        // TODO: Save opportunity note
+        alert('Opportunity note saved! (Feature coming soon)');
+        bootstrap.Modal.getInstance(document.getElementById('opportunityNoteModal')).hide();
+    }
+
+    function saveClientNote() {
+        // TODO: Save client note
+        alert('Client note saved! (Feature coming soon)');
+        bootstrap.Modal.getInstance(document.getElementById('clientNoteModal')).hide();
+    }
+
+    // Workflow related functions
+    function initiateWorkflow() {
+        loadClientsForWorkflow(); // Populate client dropdown
+    }
+
+    function loadClientsForWorkflow() {
+        // TODO: Fetch client list via AJAX and populate #workflowClient
+        const clientSelect = document.getElementById('workflowClient');
+        // Example:
+        // fetch('/api/clients')
+        //     .then(res => res.json())
+        //     .then(clients => {
+        //         clients.forEach(client => {
+        //             const option = document.createElement('option');
+        //             option.value = client.id;
+        //             option.textContent = client.name;
+        //             clientSelect.appendChild(option);
+        //         });
+        //     });
+    }
+
+    function loadClientWorkflows() {
+        const clientSelect = document.getElementById('workflowClient');
+        const workflowTypeSelect = document.getElementById('workflowType');
+        const workflowDetailsDiv = document.getElementById('workflowDetails');
+        const startWorkflowBtn = document.getElementById('startWorkflowBtn');
+
+        workflowTypeSelect.innerHTML = '<option value="">Select workflow type...</option>'; // Reset
+        workflowTypeSelect.disabled = true;
+        workflowDetailsDiv.style.display = 'none';
+        startWorkflowBtn.disabled = true;
+
+        const selectedClientId = clientSelect.value;
+        if (!selectedClientId) return;
+
+        // TODO: Fetch workflows for the selected client via AJAX
+        // Example:
+        // fetch(`/api/clients/${selectedClientId}/workflows`)
+        //     .then(res => res.json())
+        //     .then(workflows => {
+        //         workflows.forEach(workflow => {
+        //             const option = document.createElement('option');
+        //             option.value = workflow.id;
+        //             option.textContent = workflow.name;
+        //             workflowTypeSelect.appendChild(option);
+        //         });
+        //         workflowTypeSelect.disabled = false;
+        //     });
+    }
+
+    function showWorkflowDetails() {
+        const workflowTypeSelect = document.getElementById('workflowType');
+        const workflowDetailsDiv = document.getElementById('workflowDetails');
+        const startWorkflowBtn = document.getElementById('startWorkflowBtn');
+        const workflowStepsDiv = document.getElementById('workflowSteps');
+
+        workflowStepsDiv.innerHTML = ''; // Clear previous steps
+        startWorkflowBtn.disabled = true;
+
+        const selectedWorkflowId = workflowTypeSelect.value;
+        if (!selectedWorkflowId) {
+            workflowDetailsDiv.style.display = 'none';
+            return;
+        }
+
+        // TODO: Fetch workflow steps for the selected workflow ID via AJAX
+        // Example:
+        // fetch(`/api/workflows/${selectedWorkflowId}/steps`)
+        //     .then(res => res.json())
+        //     .then(steps => {
+        //         steps.forEach((step, index) => {
+        //             const p = document.createElement('p');
+        //             p.className = 'mb-1';
+        //             p.textContent = `${index + 1}. ${step.description}`;
+        //             workflowStepsDiv.appendChild(p);
+        //         });
+        //         workflowDetailsDiv.style.display = 'block';
+        //         startWorkflowBtn.disabled = false;
+        //     });
+
+        // Dummy data for demonstration
+        workflowStepsDiv.innerHTML = `
+            <p class="mb-1">1. Verify client information.</p>
+            <p class="mb-1">2. Initiate new employee onboarding process.</p>
+            <p class="mb-1">3. Assign necessary system access.</p>
+        `;
+        workflowDetailsDiv.style.display = 'block';
+        startWorkflowBtn.disabled = false;
+    }
+
+    function startWorkflow() {
+        const selectedClientId = document.getElementById('workflowClient').value;
+        const selectedWorkflowId = document.getElementById('workflowType').value;
+
+        if (!selectedClientId || !selectedWorkflowId) {
+            alert('Please select a client and a workflow to start.');
+            return;
+        }
+
+        // TODO: Initiate the workflow via AJAX
+        alert(`Starting workflow ${selectedWorkflowId} for client ${selectedClientId}...`);
+        bootstrap.Modal.getInstance(document.getElementById('workflowModal')).hide();
+    }
+
+    // Placeholder functions for new workflow buttons
+    function showOnboardingWorkflow() {
+        alert('Onboarding workflow setup is coming soon!');
+    }
+
+    function showOffboardingWorkflow() {
+        alert('Employee termination workflow is coming soon!');
+    }
+
+    function showDatabaseSchema() {
+        var modal = new bootstrap.Modal(document.getElementById('databaseSchemaModal'));
+        modal.show();
+    }
+
+    console.log('Valhalla Agency OS initialized');
+</script>
+{% endblock %}

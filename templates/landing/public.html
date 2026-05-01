@@ -1,0 +1,452 @@
+{% extends "base_public.html" %}
+
+{% block content %}
+<!-- Sticky Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top landing-navbar">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="{{ url_for('landing.index') }}">
+            <img src="{{ url_for('static', filename='images/valhalla-logo.png') }}" alt="Valhalla" class="me-2" style="width: 32px; height: 32px;">
+            <span class="fw-bold">ValhallaOS</span>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#landingNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="landingNav">
+            <ul class="navbar-nav ms-auto align-items-lg-center">
+                <li class="nav-item"><a class="nav-link" href="#why">Why ValhallaOS</a></li>
+                <li class="nav-item"><a class="nav-link" href="#modules">Modules</a></li>
+                <li class="nav-item"><a class="nav-link" href="#security">Security</a></li>
+                <li class="nav-item"><a class="nav-link" href="#partners">Partners</a></li>
+                <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                <li class="nav-item ms-lg-3">
+                    <a class="btn btn-outline-light btn-sm" href="{{ url_for('auth.login') }}">Log In</a>
+                </li>
+                <li class="nav-item ms-lg-2">
+                    <a class="btn btn-primary btn-sm" href="#demo">Request a Demo</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center py-5">
+            <div class="col-lg-7">
+                <h1 class="display-3 fw-bold mb-4">
+                    ValhallaOS — your operating system for <span class="text-primary">client trust</span>.
+                </h1>
+                <p class="lead mb-4">
+                    One place for CRM, analytics, compliance, and AI agentic support—designed for fiduciary advisors.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="#demo" class="btn btn-primary btn-lg">Request a Demo</a>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">Log In</a>
+                </div>
+            </div>
+            <div class="col-lg-5 text-center mt-5 mt-lg-0">
+                <div class="hero-graphic">
+                    <img src="{{ url_for('static', filename='images/valhalla-logo.png') }}" alt="Valhalla Agency" style="width: 200px; height: 200px;">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Why Different Section -->
+<section id="why" class="why-section py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-4 fw-bold mb-3">Different. Better.</h2>
+            <p class="lead text-muted">Built for agencies that put clients first</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i data-feather="shield"></i>
+                    </div>
+                    <h3 class="h4">Fiduciary by Design</h3>
+                    <p>Transparency isn't optional—it's built into every workflow. Your clients deserve to see the full picture, and we make that effortless.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i data-feather="layers"></i>
+                    </div>
+                    <h3 class="h4">All-in-One Workflow</h3>
+                    <p>CRM + service tickets + RFP manager + vendor graph—no more juggling spreadsheets and disparate tools. One unified platform for your entire operation.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i data-feather="activity"></i>
+                    </div>
+                    <h3 class="h4">Real Data, Real Time</h3>
+                    <p>Curated data from third-parties, such as NCUA, FDIC, and DOL datasets. Work with accurate, up-to-date information without manual data entry.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i data-feather="check-circle"></i>
+                    </div>
+                    <h3 class="h4">Compliance That Ships</h3>
+                    <p>Inspired by ComplyLense—RxDC, PCORI, 5500 helpers, audit trails. Stay compliant without the manual overhead.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i data-feather="cpu"></i>
+                    </div>
+                    <h3 class="h4">Agentic AI Assistants</h3>
+                    <p>Draft, research, pre-fill forms, and escalate—with human-in-the-loop controls. Let AI handle the routine so you can focus on relationships.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i data-feather="users"></i>
+                    </div>
+                    <h3 class="h4">Client-Centric</h3>
+                    <p>Every feature designed to amplify trust and transparency. Your clients aren't just accounts—they're relationships worth nurturing.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modules Section -->
+<section id="modules" class="modules-section py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-4 fw-bold mb-3">Comprehensive Modules</h2>
+            <p class="lead text-muted">Everything you need in one integrated platform</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+                <div class="module-card">
+                    <div class="module-icon">
+                        <i data-feather="users"></i>
+                    </div>
+                    <h3 class="h4">CRM & Pipeline</h3>
+                    <p>Accounts, contacts, activities, revenue forecasts, referral tracking. Manage every relationship with clarity and precision.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="module-card">
+                    <div class="module-icon">
+                        <i data-feather="clipboard"></i>
+                    </div>
+                    <h3 class="h4">Service & Workflow</h3>
+                    <p>Authorizations, queues, assignments, status states, timeline, exports. Keep service delivery transparent and on track.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="module-card">
+                    <div class="module-icon">
+                        <i data-feather="bar-chart-2"></i>
+                    </div>
+                    <h3 class="h4">Data & Analytics</h3>
+                    <p>Dashboards for banking/credit union/employer datasets; filters; CSV export. Turn data into actionable insights.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="module-card">
+                    <div class="module-icon">
+                        <i data-feather="file-text"></i>
+                    </div>
+                    <h3 class="h4">Compliance Suite</h3>
+                    <p>Templates, checklists, filing calendar, evidence logs. Stay ahead of regulatory requirements effortlessly.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="module-card">
+                    <div class="module-icon">
+                        <i data-feather="folder"></i>
+                    </div>
+                    <h3 class="h4">RFP Manager</h3>
+                    <p>Structured questionnaires, scoring, side-by-side comparisons, vendor notes. Make informed decisions faster.</p>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="module-card">
+                    <div class="module-icon">
+                        <i data-feather="zap"></i>
+                    </div>
+                    <h3 class="h4">Agentic Support (AI)</h3>
+                    <p>Draft, research, pre-fill forms, and escalate—with human-in-the-loop controls. Intelligent assistance that amplifies your team's expertise.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Partners & Integrations Section -->
+<section id="partners" class="partners-section py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-4 fw-bold mb-3">Integrations & Partners</h2>
+            <p class="lead text-muted">Connected to authoritative data sources</p>
+        </div>
+
+        <div class="row align-items-center justify-content-center g-4 mb-4">
+            <div class="col-6 col-md-3 text-center">
+                <div class="partner-logo">
+                    <h4 class="text-muted">NCUA</h4>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 text-center">
+                <div class="partner-logo">
+                    <h4 class="text-muted">FDIC</h4>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 text-center">
+                <div class="partner-logo">
+                    <h4 class="text-muted">DOL</h4>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 text-center">
+                <div class="partner-logo">
+                    <h4 class="text-muted">SBA</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <p class="text-muted">
+                API and import options available. Enterprise-grade data governance ensures your information stays secure and compliant.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Security & Privacy Section -->
+<section id="security" class="security-section py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h2 class="display-4 fw-bold mb-4">Security & Privacy First</h2>
+                <p class="lead mb-4">
+                    Your clients trust you with their most sensitive information. We take that responsibility seriously.
+                </p>
+
+                <div class="security-features">
+                    <div class="d-flex mb-3">
+                        <i data-feather="lock" class="text-primary me-3"></i>
+                        <div>
+                            <h5>OAuth/SSO with Granular Roles</h5>
+                            <p class="text-muted mb-0">Control access at every level with enterprise authentication</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex mb-3">
+                        <i data-feather="eye" class="text-primary me-3"></i>
+                        <div>
+                            <h5>Comprehensive Audit Logging</h5>
+                            <p class="text-muted mb-0">Every action tracked, every change documented</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex mb-3">
+                        <i data-feather="database" class="text-primary me-3"></i>
+                        <div>
+                            <h5>Data Partitioning by Client</h5>
+                            <p class="text-muted mb-0">Client data isolated and protected</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex mb-3">
+                        <i data-feather="shield" class="text-primary me-3"></i>
+                        <div>
+                            <h5>Encryption in Transit & at Rest</h5>
+                            <p class="text-muted mb-0">Bank-grade encryption protects all data</p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="mt-4">
+                    <a href="{{ url_for('landing.privacy_pdf') }}" class="btn btn-outline-primary">
+                        <i data-feather="download" class="me-2"></i>Download Privacy Policy
+                    </a>
+                </p>
+            </div>
+
+            <div class="col-lg-6 text-center">
+                <div class="security-graphic">
+                    <i data-feather="lock" style="width: 200px; height: 200px;" class="text-primary"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA & Demo Form Section -->
+<section id="demo" class="cta-section py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center mb-5">
+                <h2 class="display-4 fw-bold mb-3">See how ValhallaOS amplifies your team's time</h2>
+                <p class="lead">Request a personalized demo and discover how we can transform your agency operations.</p>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <div class="demo-form-card">
+                    <form method="POST" action="{{ url_for('landing.demo_request') }}" novalidate>
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ form.name.label(class="form-label") }}
+                            {{ form.name(class="form-control form-control-lg", placeholder="John Smith") }}
+                            {% if form.name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.name.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.email.label(class="form-label") }}
+                            {{ form.email(class="form-control form-control-lg", placeholder="john@example.com") }}
+                            {% if form.email.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.email.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.company.label(class="form-label") }}
+                            {{ form.company(class="form-control form-control-lg", placeholder="Your Company Name") }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.team_size.label(class="form-label") }}
+                            {{ form.team_size(class="form-select form-select-lg") }}
+                        </div>
+
+                        <div class="mb-4">
+                            {{ form.notes.label(class="form-label") }}
+                            {{ form.notes(class="form-control", rows=4, placeholder="Tell us about your agency and what you're looking for...") }}
+                        </div>
+
+                        <div class="d-grid">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer id="contact" class="footer-section py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4 mb-4 mb-lg-0">
+                <h5 class="fw-bold mb-3">
+                    <span class="valhalla-mark me-2">⚔</span>
+                    ValhallaOS
+                </h5>
+                <p class="text-muted">
+                    Valhalla Business Advisors<br>
+                    Your operating system for client trust
+                </p>
+                <p class="tagline text-primary fw-bold">Different. Better.</p>
+            </div>
+
+            <div class="col-lg-4 mb-4 mb-lg-0">
+                <h6 class="fw-bold mb-3">Quick Links</h6>
+                <ul class="list-unstyled">
+                    <li><a href="#why" class="text-muted text-decoration-none">Why ValhallaOS</a></li>
+                    <li><a href="#modules" class="text-muted text-decoration-none">Modules</a></li>
+                    <li><a href="#security" class="text-muted text-decoration-none">Security</a></li>
+                    <li><a href="#partners" class="text-muted text-decoration-none">Partners</a></li>
+                    <li><a href="{{ url_for('auth.login') }}" class="text-muted text-decoration-none">Log In</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-4">
+                <h6 class="fw-bold mb-3">Legal</h6>
+                <ul class="list-unstyled">
+                    <li><a href="{{ url_for('landing.privacy_pdf') }}" class="text-muted text-decoration-none">Privacy Policy</a></li>
+                    <li><a href="#" class="text-muted text-decoration-none">Terms of Service</a></li>
+                    <li><a href="#security" class="text-muted text-decoration-none">Security</a></li>
+                    <li><a href="#contact" class="text-muted text-decoration-none">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <hr class="my-4">
+
+        <div class="text-center text-muted">
+            <p class="mb-0">&copy; {{ now.year if now else '2025' }} Valhalla Business Advisors. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            const href = this.getAttribute('href');
+            if (href !== '#') {
+                e.preventDefault();
+                const target = document.querySelector(href);
+                if (target) {
+                    const navHeight = document.querySelector('.landing-navbar').offsetHeight;
+                    const targetPosition = target.offsetTop - navHeight;
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        });
+    });
+
+    // Navbar background on scroll
+    window.addEventListener('scroll', function() {
+        const navbar = document.querySelector('.landing-navbar');
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    });
+</script>
+{% endblock %}

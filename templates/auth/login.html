@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Valhalla Agency OS{% endblock %}
+
+{% block main_class %}{% endblock %}
+
+<!-- Override navbar to hide it on login page -->
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid vh-100 d-flex align-items-center justify-content-center bg-dark">
+    <div class="row w-100">
+        <div class="col-md-6 col-lg-4 mx-auto">
+            <div class="card border-0 shadow-lg" style="background: rgba(15, 15, 15, 0.95); border: 1px solid rgba(91, 33, 182, 0.4) !important; box-shadow: 0 30px 80px rgba(91, 33, 182, 0.4), 0 0 40px rgba(91, 33, 182, 0.3) !important;">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <a href="{{ url_for('landing.index') }}" class="text-decoration-none">
+                            <img src="{{ url_for('static', filename='images/valhalla-logo.png') }}" alt="ValhallaOS" style="width: 48px; height: 48px;" class="mb-2">
+                            <h2 class="h4 mb-0 text-white">ValhallaOS</h2>
+                        </a>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('auth.login') }}">
+                        {{ form.hidden_tag() }}
+
+                        <div class="mb-3">
+                            {{ form.email.label(class="form-label") }}
+                            {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else "")) }}
+                            {% if form.email.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.email.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form.password.label(class="form-label") }}
+                            {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else "")) }}
+                            {% if form.password.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.password.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i data-feather="log-in" class="me-2"></i>
+                                Sign In
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <small class="text-muted">
+                            Secure insurance agency management system
+                        </small>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <hr class="my-3">
+                        <p class="text-muted mb-2">
+                            <small>Need access to ValhallaOS?</small>
+                        </p>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#requestAccessModal">
+                            <i data-feather="user-plus" class="me-1"></i>
+                            Request Access
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Request Access Modal -->
+<div class="modal fade" id="requestAccessModal" tabindex="-1" aria-labelledby="requestAccessModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="requestAccessModalLabel">
+                    <i data-feather="user-plus" class="me-2"></i>
+                    Request Access
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="requestAccessForm">
+                <div class="modal-body">
+                    <p class="text-muted mb-3">
+                        Submit your information below and an administrator will review your access request for ValhallaOS.
+                    </p>
+
+                    <div class="mb-3">
+                        <label for="requestFirstName" class="form-label">First Name *</label>
+                        <input type="text" class="form-control" id="requestFirstName" name="first_name" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="requestLastName" class="form-label">Last Name *</label>
+                        <input type="text" class="form-control" id="requestLastName" name="last_name" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="requestEmail" class="form-label">Email Address *</label>
+                        <input type="email" class="form-control" id="requestEmail" name="email" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="requestCompany" class="form-label">Company/Organization</label>
+                        <input type="text" class="form-control" id="requestCompany" name="company">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="requestReason" class="form-label">Reason for Access Request *</label>
+                        <textarea class="form-control" id="requestReason" name="reason" rows="3" placeholder="Please explain why you need access to ValhallaOS..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i data-feather="send" class="me-2"></i>
+                        Submit Request
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Auto-focus on email field
+    document.querySelector('#email').focus();
+
+    // Initialize feather icons after page load
+    document.addEventListener('DOMContentLoaded', function() {
+        feather.replace();
+
+        // Handle request access form submission
+        document.getElementById('requestAccessForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+
+            // Show loading state
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting...';
+            submitBtn.disabled = true;
+
+            fetch('{{ url_for("auth.request_access") }}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('requestAccessModal'));
+                    modal.hide();
+
+                    // Show success alert
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed';
+                    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+                    alertDiv.innerHTML = `
+                        <i data-feather="check-circle" class="me-2"></i>
+                        Your access request has been submitted successfully. An administrator will review it shortly.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    document.body.appendChild(alertDiv);
+                    feather.replace();
+
+                    // Reset form
+                    document.getElementById('requestAccessForm').reset();
+
+                    // Auto-hide alert after 5 seconds
+                    setTimeout(() => {
+                        if (alertDiv.parentNode) {
+                            alertDiv.remove();
+                        }
+                    }, 5000);
+                } else {
+                    throw new Error(data.message || 'Failed to submit request');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to submit access request. Please try again.');
+            })
+            .finally(() => {
+                // Reset button state
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Policies - Valhalla Agency OS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2">
+                <i data-feather="shield" class="me-2"></i>
+                Policies
+            </h1>
+            <a href="{{ url_for('policies.new_policy') }}" class="btn btn-primary">
+                <i data-feather="plus" class="me-2"></i>
+                New Policy
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filters -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-4">
+                        {{ search_form.q(class="form-control", placeholder="Search policies by client, policy number, or type...") }}
+                    </div>
+                    <div class="col-md-2">
+                        <select name="type" class="form-select">
+                            <option value="all" {% if policy_type == 'all' %}selected{% endif %}>All Types</option>
+                            <option value="group" {% if policy_type == 'group' %}selected{% endif %}>Group Policies</option>
+                            <option value="individual" {% if policy_type == 'individual' %}selected{% endif %}>Individual Policies</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="status" class="form-select">
+                            <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                            <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Status</option>
+                            <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                            <option value="terminated_lapsed" {% if status_filter == 'terminated_lapsed' or status_filter == 'terminated' or status_filter == 'lapsed' %}selected{% endif %}>Terminated/Lapsed</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-outline-primary w-100">
+                            <i data-feather="search" class="me-2"></i>Search
+                        </button>
+                    </div>
+                    <div class="col-md-2">
+                        <a href="{{ url_for('policies.policies') }}" class="btn btn-outline-secondary w-100">
+                            <i data-feather="x" class="me-2"></i>Clear
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Policies List -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i data-feather="list" class="me-2"></i>
+                    Policies ({{ policies.total }} total)
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                {% if policies.items %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Type</th>
+                                <th>Client</th>
+                                <th>Carrier</th>
+                                <th>Product Type</th>
+                                <th>Policy Number</th>
+                                <th>Effective Date</th>
+                                <th>Status</th>
+                                <th>Amount/Revenue</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in policies.items %}
+                            <tr>
+                                <td>
+                                    {% if item.type == 'group' %}
+                                        <span class="badge bg-primary">Group</span>
+                                    {% else %}
+                                        <span class="badge bg-info">Individual</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle me-2">
+                                            {{ item.client_name[0] }}
+                                        </div>
+                                        <div>
+                                            {% if item.type == 'group' %}
+                                                <a href="{{ url_for('accounts.organization_detail', org_id=item.client_id) }}"
+                                                   class="text-decoration-none fw-medium">
+                                                    {{ item.client_name }}
+                                                </a>
+                                            {% else %}
+                                                <a href="{{ url_for('accounts.individual_detail', individual_id=item.client_id) }}"
+                                                   class="text-decoration-none fw-medium">
+                                                    {{ item.client_name }}
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ item.policy.carrier.name if item.policy.carrier else 'N/A' }}</td>
+                                <td>
+                                    <span class="badge bg-secondary">
+                                        {{ item.policy.product_type.replace('_', ' ').title() }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if item.policy.policy_number %}
+                                        <code>{{ item.policy.policy_number }}</code>
+                                    {% else %}
+                                        <span class="text-muted">Not set</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.policy.effective_date %}
+                                        {{ item.policy.effective_date.strftime('%m/%d/%Y') }}
+                                    {% else %}
+                                        <span class="text-muted">Not set</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.policy.status == 'active' %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% elif item.policy.status == 'lapsed' %}
+                                        <span class="badge bg-warning">Lapsed</span>
+                                    {% elif item.policy.status == 'terminated' %}
+                                        <span class="badge bg-danger">Terminated</span>
+                                    {% else %}
+                                        <span class="badge bg-info">{{ item.policy.status.title() }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.type == 'group' and item.policy.estimated_monthly_revenue %}
+                                        <span class="text-success fw-bold">
+                                            ${{ "{:,.0f}".format(item.policy.estimated_monthly_revenue) }}/mo
+                                        </span>
+                                    {% elif item.type == 'individual' and item.policy.face_amount %}
+                                        <span class="text-info fw-bold">
+                                            ${{ "{:,.0f}".format(item.policy.face_amount) }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm">
+                                        {% if item.type == 'group' %}
+                                            <a href="{{ url_for('policies.group_policy_detail', policy_id=item.policy.id) }}" class="btn btn-sm btn-outline-primary me-1" title="View Policy">
+                                                <i data-feather="eye"></i>
+                                            </a>
+                                            <a href="{{ url_for('policies.edit_group_policy', policy_id=item.policy.id) }}" class="btn btn-sm btn-outline-secondary" title="Edit Policy">
+                                                <i data-feather="edit"></i>
+                                            </a>
+                                        {% else %}
+                                            <a href="{{ url_for('policies.individual_policy_detail', policy_id=item.policy.id) }}" class="btn btn-sm btn-outline-primary me-1" title="View Policy">
+                                                <i data-feather="eye"></i>
+                                            </a>
+                                            <a href="{{ url_for('policies.edit_individual_policy', policy_id=item.policy.id) }}" class="btn btn-sm btn-outline-secondary" title="Edit Policy">
+                                                <i data-feather="edit"></i>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if policies.pages > 1 %}
+                <div class="card-footer">
+                    <nav aria-label="Policies pagination">
+                        <ul class="pagination pagination-sm mb-0 justify-content-center">
+                            {% if policies.has_prev %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('policies.policies', page=policies.prev_num, q=request.args.get('q'), type=policy_type, status=status_filter) }}">
+                                        Previous
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% for page_num in range(1, policies.pages + 1) %}
+                                {% if page_num == policies.page %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ page_num }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('policies.policies', page=page_num, q=request.args.get('q'), type=policy_type, status=status_filter) }}">
+                                            {{ page_num }}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if policies.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('policies.policies', page=policies.next_num, q=request.args.get('q'), type=policy_type, status=status_filter) }}">
+                                        Next
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+
+                {% else %}
+                <div class="text-center text-muted py-5">
+                    <i data-feather="shield" class="mb-3" style="width: 48px; height: 48px;"></i>
+                    <h4>No Policies Found</h4>
+                    <p>Create your first policy to get started.</p>
+                    <a href="{{ url_for('policies.new_policy') }}" class="btn btn-primary">
+                        <i data-feather="plus" class="me-2"></i>New Policy
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

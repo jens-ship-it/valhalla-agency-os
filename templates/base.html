@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{% block title %}ValhallaOS{% endblock %}</title>
+
+    <!-- Bootstrap CSS with Replit dark theme -->
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    {% block navbar %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='images/valhalla-logo.png') }}" alt="Valhalla Agency" class="me-2" style="width: 32px; height: 32px;">
+                ValhallaOS
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                {% if current_user.is_authenticated %}
+                <ul class="navbar-nav me-auto">
+                    {% if current_user.has_any_role('service', 'admin') %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i data-feather="clipboard" class="me-1"></i>Service
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item py-2" href="{{ url_for('service.tickets') }}">
+                                    <i data-feather="clipboard" class="me-2"></i>Tickets
+                                </a></li>
+                            <li><a class="dropdown-item py-2" href="{{ url_for('service.reports') }}">
+                                    <i data-feather="bar-chart-2" class="me-2"></i>Reports
+                                </a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+
+                    {% if current_user.has_any_role('account_mgmt', 'admin') %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i data-feather="users" class="me-1"></i>Account Management
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item py-2" href="{{ url_for('accounts.corporate_clients') }}">
+                                    <i data-feather="home" class="me-2"></i>Corporate Clients
+                                </a></li>
+                            <li><a class="dropdown-item py-2" href="{{ url_for('accounts.organizations') }}">
+                                    <i data-feather="database" class="me-2"></i>Organizations
+                                </a></li>
+                            <li><a class="dropdown-item py-2" href="{{ url_for('accounts.individuals') }}">
+                                    <i data-feather="user" class="me-2"></i>Individual Clients
+                                </a></li>
+                            <li><a class="dropdown-item py-2" href="{{ url_for('policies.policies') }}">
+                                    <i data-feather="shield" class="me-2"></i>Policies and Contracts
+                                </a></li>
+                            {% if current_user.has_any_role('marketing', 'account_mgmt', 'admin') %}
+                            <li><a class="dropdown-item py-2" href="{{ url_for('vendors.vendors') }}">
+                                    <i data-feather="home" class="me-2"></i>Vendors
+                                </a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                    {% endif %}
+
+                    {% if current_user.has_any_role('account_mgmt', 'admin') %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i data-feather="file-text" class="me-1"></i>RFP
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item py-2" href="#" onclick="showComingSoon()">
+                                    <i data-feather="file-plus" class="me-2"></i>Create New RFP
+                                </a></li>
+                            <li><a class="dropdown-item py-2" href="#" onclick="showComingSoon()">
+                                    <i data-feather="folder" class="me-2"></i>Manage Existing RFP
+                                </a></li>
+                            <li><a class="dropdown-item py-2" href="#" onclick="showComingSoon()">
+                                    <i data-feather="file-text" class="me-2"></i>RFP Templates
+                                </a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+
+                    {% if current_user.has_any_role('sales', 'admin') %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i data-feather="trending-up" class="me-1"></i>Sales
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item py-2" href="{{ url_for('sales.deals') }}">
+                                    <i data-feather="trending-up" class="me-2"></i>Pipeline
+                                </a></li>
+                            <li><a class="dropdown-item py-2" href="{{ url_for('sales.prospect_view') }}">
+                                    <i data-feather="eye" class="me-2"></i>Prospect View
+                                </a></li>
+                            <li><a class="dropdown-item py-2" href="#" onclick="showComingSoon()">
+                                    <i data-feather="bar-chart-2" class="me-2"></i>Reports
+                                </a></li>
+                            <li><a class="dropdown-item py-2" href="{{ url_for('contacts.coi_list') }}">
+                                    <i data-feather="users" class="me-2"></i>COI
+                                </a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+
+                    {% if current_user.has_any_role('marketing', 'admin') %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i data-feather="target" class="me-1"></i>Marketing Analytics
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item py-2" href="{{ url_for('vendors.broker_partners') }}">
+                                <i data-feather="link" class="me-2"></i>Brokerage Relationships
+                            </a></li>
+                            <li><a class="dropdown-item py-2" href="#" onclick="showComingSoon()">
+                                    <i data-feather="pie-chart" class="me-2"></i>Campaign Analytics
+                                </a></li>
+                            <li><a class="dropdown-item py-2" href="#" onclick="showComingSoon()">
+                                    <i data-feather="users" class="me-2"></i>Lead Tracking
+                                </a></li>
+                            <li><a class="dropdown-item py-2" href="#" onclick="showComingSoon()">
+                                    <i data-feather="trending-up" class="me-2"></i>Performance Reports
+                                </a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+
+                    {% if current_user.has_admin_role() %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i data-feather="settings" class="me-1"></i>Admin
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item py-2" href="{{ url_for('admin.users') }}">
+                                    <i data-feather="users" class="me-2"></i>Users
+                                </a></li>
+                                <li><a class="dropdown-item py-2" href="{{ url_for('admin.roles') }}">
+                                    <i data-feather="shield" class="me-2"></i>Roles
+                                </a></li>
+                                <li><a class="dropdown-item py-2" href="{{ url_for('admin.access_requests') }}">
+                                    <i data-feather="user-check" class="me-2"></i>Access Requests
+                                </a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                </ul>
+
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i data-feather="user" class="me-1"></i>{{ current_user.first_name }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><span class="dropdown-item-text py-2">{{ current_user.full_name }}</span></li>
+                            <li><span class="dropdown-item-text small text-muted py-1">{{ current_user.email }}</span></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item py-2" href="{{ url_for('auth.logout') }}">
+                                <i data-feather="log-out" class="me-1"></i>Logout
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    {% endblock %}
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="container mt-3">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main class="{% block main_class %}container my-4{% endblock %}">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-3 mt-5">
+        <div class="container">
+            <div class="d-md-flex justify-content-between align-items-center text-center">
+                <div class="mb-2 mb-md-0">
+                    <small>&copy; 2025 Valhalla Business Advisors, LLC. All rights reserved.</small>
+                </div>
+                <div>
+                    <small>Insurance Agency Management System</small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Initialize Feather Icons -->
+    <script>feather.replace()</script>
+
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

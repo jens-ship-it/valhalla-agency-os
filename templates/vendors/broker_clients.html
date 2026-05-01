@@ -1,0 +1,199 @@
+
+{% extends "base.html" %}
+
+{% block title %}{{ broker.name }} - Clients - Valhalla Agency OS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{{ url_for('vendors.broker_partners') }}">Broker Partners</a>
+                </li>
+                <li class="breadcrumb-item active">{{ broker.name }}</li>
+            </ol>
+        </nav>
+        <h2>
+            <i data-feather="users" class="me-2"></i>
+            {{ broker.name }} - Clients
+        </h2>
+    </div>
+    <a href="{{ url_for('vendors.vendor_detail', vendor_id=broker.id) }}" class="btn btn-outline-secondary">
+        <i data-feather="eye" class="me-1"></i>View Broker Details
+    </a>
+</div>
+
+<!-- Link New Client -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i data-feather="link" class="me-2"></i>
+            Link New Client
+        </h5>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('vendors.link_client_to_broker', broker_id=broker.id) }}" class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Client Organization</label>
+                <select name="client_id" class="form-select" required>
+                    <option value="">Select client...</option>
+                    {% for org in available_clients %}
+                    <option value="{{ org.id }}">{{ org.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Relationship Type</label>
+                <select name="relationship_type" class="form-select">
+                    <option value="distribution">Distribution</option>
+                    <option value="referral">Referral</option>
+                    <option value="partnership">Partnership</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">&nbsp;</label>
+                <button type="submit" class="btn btn-primary d-block">
+                    <i data-feather="plus" class="me-1"></i>Link Client
+                </button>
+            </div>
+            <div class="col-12">
+                <label class="form-label">Notes</label>
+                <textarea name="notes" class="form-control" rows="2" placeholder="Optional notes about this relationship..."></textarea>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Current Clients -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i data-feather="briefcase" class="me-2"></i>
+            Current Clients ({{ relationships|length }})
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        {% if relationships %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Client</th>
+                        <th>Relationship Type</th>
+                        <th>Active Policies</th>
+                        <th>Created</th>
+                        <th>Notes</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for relationship in relationships %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-circle me-2">
+                                    {{ relationship.client_entity.name[0] }}
+                                </div>
+                                <div>
+                                    <div class="fw-semibold">
+                                        <a href="{{ url_for('accounts.organization_detail', org_id=relationship.client_entity.id) }}"
+                                           class="text-decoration-none">
+                                            {{ relationship.client_entity.name }}
+                                        </a>
+                                    </div>
+                                    {% if relationship.client_entity.industry %}
+                                        <small class="text-muted">{{ relationship.client_entity.industry }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-primary">{{ relationship.relationship_type.title() }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ relationship.client_entity.active_policies_count }}</span>
+                        </td>
+                        <td>
+                            <small class="text-muted">
+                                {{ relationship.created_at.strftime('%Y-%m-%d') }}
+                            </small>
+                        </td>
+                        <td>
+                            {% if relationship.notes %}
+                                <small class="text-muted">{{ relationship.notes[:50] }}{% if relationship.notes|length > 50 %}...{% endif %}</small>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('accounts.organization_detail', org_id=relationship.client_entity.id) }}"
+                                   class="btn btn-outline-primary" title="View Client">
+                                    <i data-feather="eye"></i>
+                                </a>
+                                <button type="button" class="btn btn-outline-danger" title="Remove Relationship"
+                                        onclick="removeRelationship({{ relationship.id }}, '{{ relationship.client_entity.name }}')">
+                                    <i data-feather="unlink"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i data-feather="users" class="text-muted mb-2" style="width: 32px; height: 32px;"></i>
+            <p class="text-muted">No clients linked to this broker partner yet.</p>
+            <p class="text-muted">Use the form above to link your first client.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Remove Relationship Modal -->
+<div class="modal fade" id="removeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Remove Client Relationship</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="removeMessage"></p>
+                <div class="alert alert-warning">
+                    <i data-feather="alert-triangle" class="me-2"></i>
+                    This will mark the relationship as inactive but won't delete the client or broker data.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" style="display: inline;" id="removeForm">
+                    <button type="submit" class="btn btn-danger">Remove Relationship</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function removeRelationship(relationshipId, clientName) {
+    const modal = new bootstrap.Modal(document.getElementById('removeModal'));
+    const message = document.getElementById('removeMessage');
+    const form = document.getElementById('removeForm');
+    
+    message.textContent = `Remove the relationship with "${clientName}"?`;
+    form.action = `{{ url_for('vendors.remove_client_relationship', relationship_id=0) }}`.replace('0', relationshipId);
+    
+    modal.show();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    feather.replace();
+});
+</script>
+{% endblock %}

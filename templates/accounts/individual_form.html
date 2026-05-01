@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit Individual' if individual else 'New Individual' }} - Valhalla Agency OS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i data-feather="{{ 'edit' if individual else 'plus' }}" class="me-2"></i>
+                    {{ 'Edit Individual' if individual else 'New Individual' }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <!-- Basic Information -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.first_name.label(class="form-label") }}
+                            {{ form.first_name(class="form-control" + (" is-invalid" if form.first_name.errors else "")) }}
+                            {% if form.first_name.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.first_name.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.last_name.label(class="form-label") }}
+                            {{ form.last_name(class="form-control" + (" is-invalid" if form.last_name.errors else "")) }}
+                            {% if form.last_name.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.last_name.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.dob.label(class="form-label") }}
+                            {{ form.dob(class="form-control" + (" is-invalid" if form.dob.errors else "")) }}
+                            {% if form.dob.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.dob.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.ssn_last4.label(class="form-label") }}
+                            {{ form.ssn_last4(class="form-control" + (" is-invalid" if form.ssn_last4.errors else ""), maxlength="4", pattern="[0-9]{4}", placeholder="1234") }}
+                            {% if form.ssn_last4.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.ssn_last4.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Optional - for client identification purposes</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            {{ form.status.label(class="form-label") }}
+                            {{ form.status(class="form-select" + (" is-invalid" if form.status.errors else "")) }}
+                            {% if form.status.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.status.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Information -->
+                    <h5 class="mt-4 mb-3">
+                        <i data-feather="phone" class="me-2"></i>
+                        Contact Information
+                    </h5>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Email</label>
+                            {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""), type="email") }}
+                            {% if form.email.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.email.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            {{ form.phone.label(class="form-label") }}
+                            {{ form.phone(class="form-control" + (" is-invalid" if form.phone.errors else "")) }}
+                            {% if form.phone.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.phone.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            {{ form.mobile.label(class="form-label") }}
+                            {{ form.mobile(class="form-control" + (" is-invalid" if form.mobile.errors else "")) }}
+                            {% if form.mobile.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.mobile.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Mobile/cell phone</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Address -->
+                    <h5 class="mt-4 mb-3">
+                        <i data-feather="map-pin" class="me-2"></i>
+                        Address
+                    </h5>
+                    
+                    <div class="mb-3">
+                        {{ form.address_line1.label(class="form-label") }}
+                        {{ form.address_line1(class="form-control" + (" is-invalid" if form.address_line1.errors else "")) }}
+                        {% if form.address_line1.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.address_line1.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.address_line2.label(class="form-label") }}
+                        {{ form.address_line2(class="form-control" + (" is-invalid" if form.address_line2.errors else "")) }}
+                        {% if form.address_line2.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.address_line2.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-5 mb-3">
+                            {{ form.city.label(class="form-label") }}
+                            {{ form.city(class="form-control" + (" is-invalid" if form.city.errors else "")) }}
+                            {% if form.city.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.city.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            {{ form.state.label(class="form-label") }}
+                            {{ form.state(class="form-control" + (" is-invalid" if form.state.errors else "")) }}
+                            {% if form.state.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.state.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-3 mb-3">
+                            {{ form.zip.label(class="form-label") }}
+                            {{ form.zip(class="form-control" + (" is-invalid" if form.zip.errors else "")) }}
+                            {% if form.zip.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.zip.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Notes -->
+                    <div class="mb-4">
+                        {{ form.notes.label(class="form-label") }}
+                        {{ form.notes(class="form-control", rows="4") }}
+                        {% if form.notes.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.notes.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('accounts.individuals') }}" class="btn btn-secondary">
+                            <i data-feather="arrow-left" class="me-2"></i>
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i data-feather="{{ 'save' if individual else 'plus' }}" class="me-2"></i>
+                            {{ 'Update Individual' if individual else 'Create Individual' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

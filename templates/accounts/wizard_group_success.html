@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Success - Client Created{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 offset-lg-2">
+        <div class="text-center mb-4">
+            <div class="mb-3">
+                <i data-feather="check-circle" style="width: 64px; height: 64px; color: #28a745;"></i>
+            </div>
+            <h2 class="text-success mb-3">Corporate Client & Policy Created!</h2>
+            <p class="lead">{{ entity.name }} and the group policy have been successfully created.</p>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Corporate Client</h6>
+                        <p class="mb-2"><strong>{{ entity.name }}</strong></p>
+                        {% if entity.industry %}
+                        <p class="mb-1"><small>{{ entity.industry }}</small></p>
+                        {% endif %}
+                        {% if entity.city and entity.state %}
+                        <p class="mb-1"><small>{{ entity.city }}, {{ entity.state }}</small></p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Group Policy</h6>
+                        <p class="mb-2"><strong>{{ policy.product_type|title }}</strong></p>
+                        {% if policy.carrier %}
+                        <p class="mb-1"><small>Carrier: {{ policy.carrier.name }}</small></p>
+                        {% endif %}
+                        {% if policy.policy_number %}
+                        <p class="mb-1"><small>Policy #: {{ policy.policy_number }}</small></p>
+                        {% endif %}
+                        <p class="mb-1"><small>Effective: {{ policy.effective_date.strftime('%m/%d/%Y') }}</small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">What's Next?</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('accounts.organization_detail', org_id=entity.id) }}" class="btn btn-primary">
+                        <i data-feather="eye" class="me-2"></i>View Corporate Client Details
+                    </a>
+                    <a href="{{ url_for('accounts.wizard_group_policy_start') }}" class="btn btn-outline-primary">
+                        <i data-feather="plus-circle" class="me-2"></i>Add Another Corporate Client + Policy
+                    </a>
+                    <a href="{{ url_for('accounts.organizations') }}" class="btn btn-outline-secondary">
+                        <i data-feather="list" class="me-2"></i>View All Corporate Clients
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,273 @@
+
+{% extends "base.html" %}
+
+{% block title %}Center of Influence - Valhalla Agency OS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2">
+                <i data-feather="star" class="me-2"></i>
+                Center of Influence (COI)
+            </h1>
+            <a href="{{ url_for('contacts.create_coi') }}" class="btn btn-primary">
+                <i data-feather="plus" class="me-2"></i>
+                New COI Record
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" class="d-flex gap-2 align-items-center">
+                    <input type="text" name="q" class="form-control form-control-sm" 
+                           placeholder="Search contacts or explanations..." 
+                           value="{{ request.args.get('q', '') }}">
+                    
+                    <select name="category" class="form-select form-select-sm">
+                        <option value="">All Categories</option>
+                        {% for value, label in categories %}
+                            <option value="{{ value }}" {% if request.args.get('category') == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    
+                    <select name="user" class="form-select form-select-sm">
+                        <option value="">All Salespeople</option>
+                        {% for user in users %}
+                            <option value="{{ user.id }}" {% if request.args.get('user')|int == user.id %}selected{% endif %}>
+                                {{ user.full_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    
+                    <button type="submit" class="btn btn-outline-secondary btn-sm">
+                        <i data-feather="filter"></i>
+                    </button>
+                    {% if request.args.get('q') or request.args.get('category') or request.args.get('user') %}
+                        <a href="{{ url_for('contacts.coi_list') }}" class="btn btn-outline-danger btn-sm">
+                            <i data-feather="x"></i>
+                        </a>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- COI Records -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i data-feather="star" class="me-2"></i>
+                    COI Records ({{ coi_records.total }} total)
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                {% if coi_records.items %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Contact</th>
+                                <th>Category</th>
+                                <th>Salesperson</th>
+                                <th>Explanation</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for coi in coi_records.items %}
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">
+                                        <a href="{{ url_for('contacts.contact_detail', contact_id=coi.contact.id) }}" 
+                                           class="text-decoration-none">
+                                            {{ coi.contact.full_name }}
+                                        </a>
+                                    </div>
+                                    <small class="text-muted">{{ coi.contact.email or '' }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary">
+                                        {% if coi.category == 'greek_organization' %}
+                                            Greek Organization
+                                        {% else %}
+                                            {{ coi.category.replace('_', ' ').title() }}
+                                        {% endif %}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if coi.user %}
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle-sm me-2">
+                                                {{ coi.user.first_name[0] }}{{ coi.user.last_name[0] }}
+                                            </div>
+                                            {{ coi.user.full_name }}
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if coi.explanation %}
+                                        {{ coi.explanation[:50] }}
+                                        {% if coi.explanation|length > 50 %}...{% endif %}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if coi.status == 'active' %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        {{ coi.created_at.strftime('%Y-%m-%d') }}
+                                    </small>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('contacts.contact_detail', contact_id=coi.contact.id) }}" 
+                                           class="btn btn-outline-primary" title="View Contact">
+                                            <i data-feather="eye"></i>
+                                        </a>
+                                        <a href="{{ url_for('contacts.edit_coi', coi_id=coi.id) }}" 
+                                           class="btn btn-outline-secondary" title="Edit COI">
+                                            <i data-feather="edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger" 
+                                                title="Delete COI"
+                                                onclick="deleteCOI({{ coi.id }}, '{{ coi.contact.full_name }}')">
+                                            <i data-feather="trash-2"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i data-feather="star" class="text-muted mb-3" style="width: 48px; height: 48px;"></i>
+                    <h5 class="text-muted">No COI records found</h5>
+                    <p class="text-muted">Create your first COI record to track influential contacts.</p>
+                    <a href="{{ url_for('contacts.create_coi') }}" class="btn btn-primary">
+                        <i data-feather="plus" class="me-2"></i>Create First COI Record
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if coi_records.pages > 1 %}
+            <div class="card-footer">
+                <nav aria-label="COI pagination">
+                    <ul class="pagination pagination-sm justify-content-center mb-0">
+                        {% if coi_records.has_prev %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('contacts.coi_list', page=coi_records.prev_num, **request.args) }}">Previous</a>
+                            </li>
+                        {% endif %}
+
+                        {% for page_num in coi_records.iter_pages() %}
+                            {% if page_num %}
+                                {% if page_num != coi_records.page %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('contacts.coi_list', page=page_num, **request.args) }}">{{ page_num }}</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ page_num }}</span>
+                                    </li>
+                                {% endif %}
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">…</span>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if coi_records.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('contacts.coi_list', page=coi_records.next_num, **request.args) }}">Next</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Summary Stats -->
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <i data-feather="users" class="mb-2" style="width: 32px; height: 32px;"></i>
+                <h4>{{ coi_records.total }}</h4>
+                <p class="mb-0">Total COI Records</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <i data-feather="check-circle" class="mb-2" style="width: 32px; height: 32px;"></i>
+                <h4>{{ coi_records.items | selectattr('is_active') | list | length }}</h4>
+                <p class="mb-0">Active COIs</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <i data-feather="briefcase" class="mb-2" style="width: 32px; height: 32px;"></i>
+                <h4>{{ coi_records.items | selectattr('category', 'equalto', 'CPA') | list | length + coi_records.items | selectattr('category', 'equalto', 'attorney') | list | length }}</h4>
+                <p class="mb-0">Professional COIs</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <i data-feather="heart" class="mb-2" style="width: 32px; height: 32px;"></i>
+                <h4>{{ coi_records.items | selectattr('category', 'equalto', 'family') | list | length + coi_records.items | selectattr('category', 'equalto', 'local_friend') | list | length }}</h4>
+                <p class="mb-0">Personal COIs</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function deleteCOI(coiId, contactName) {
+    if (confirm(`Delete COI record for ${contactName}?`)) {
+        fetch(`{{ url_for('contacts.delete_coi', coi_id=0) }}`.replace('0', coiId), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            }
+        }).then(() => {
+            location.reload();
+        });
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,374 @@
+{% extends "base.html" %}
+
+{% block title %}Prospect View - Valhalla Agency OS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2">
+                <i data-feather="eye" class="me-2"></i>
+                Prospect View
+            </h1>
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                    <i data-feather="user-plus" class="me-2"></i>
+                    Add Prospect
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{{ url_for('accounts.create_organization') }}">
+                        <i data-feather="briefcase" class="me-2"></i>New Corporate Prospect
+                    </a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('accounts.create_individual') }}">
+                        <i data-feather="user" class="me-2"></i>New Individual Prospect
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filters -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-8">
+                        {{ search_form.q(class="form-control", placeholder="Search prospects by name...") }}
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-outline-primary w-100">
+                            <i data-feather="search"></i>
+                        </button>
+                    </div>
+                    <div class="col-md-2">
+                        <a href="{{ url_for('sales.prospect_view') }}" class="btn btn-outline-secondary w-100">
+                            <i data-feather="x" class="me-2"></i>Clear
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Prospects List -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i data-feather="users" class="me-2"></i>
+                    Prospects ({{ prospects.total }} total)
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                {% if prospects.items %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Prospect</th>
+                                <th>Type</th>
+                                <th>Open Deals</th>
+                                <th>Total Value</th>
+                                <th>Latest Stage</th>
+                                <th>Last Activity</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prospect_data in prospects.items %}
+                            {% set prospect = prospect_data.prospect %}
+                            {% set latest_deal = prospect_data.deals|sort(attribute='updated_at', reverse=true)|first %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle me-2">
+                                            {% if prospect_data.type == 'entity' %}
+                                                {{ prospect.name[0] }}
+                                            {% else %}
+                                                {{ prospect.first_name[0] }}{{ prospect.last_name[0] }}
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold">
+                                                {% if prospect_data.type == 'entity' %}
+                                                    <a href="{{ url_for('accounts.organization_detail', org_id=prospect.id) }}" 
+                                                       class="text-decoration-none">
+                                                        {{ prospect.name }}
+                                                    </a>
+                                                {% else %}
+                                                    <a href="{{ url_for('accounts.individual_detail', individual_id=prospect.id) }}" 
+                                                       class="text-decoration-none">
+                                                        {{ prospect.full_name }}
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                            {% if prospect_data.type == 'entity' and prospect.industry %}
+                                                <small class="text-muted">{{ prospect.industry }}</small>
+                                            {% elif prospect_data.type == 'contact' and prospect.work_email %}
+                                                <small class="text-muted">{{ prospect.work_email }}</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if prospect_data.type == 'entity' %}
+                                        <span class="badge bg-primary">Corporate</span>
+                                    {% else %}
+                                        <span class="badge bg-info">Individual</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-warning">{{ prospect_data.open_deals }}</span>
+                                    <small class="text-muted">/ {{ prospect_data.deals|length }} total</small>
+                                </td>
+                                <td>
+                                    {% if prospect_data.total_value > 0 %}
+                                        <span class="text-success fw-bold">${{ "{:,.0f}".format(prospect_data.total_value) }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if latest_deal %}
+                                        {% set stage_class = {
+                                            0: 'secondary',
+                                            1: 'info',
+                                            2: 'warning',
+                                            3: 'primary',
+                                            4: 'success',
+                                            5: 'dark'
+                                        } %}
+                                        <span class="badge bg-{{ stage_class.get(latest_deal.stage, 'secondary') }}">
+                                            {{ latest_deal.stage_name }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if prospect_data.last_activity %}
+                                        <small class="text-muted">
+                                            {{ prospect_data.last_activity.strftime('%Y-%m-%d') }}
+                                        </small>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-primary" 
+                                                onclick="viewProspectDetails('{{ prospect_data.type }}', {{ prospect.id }})"
+                                                title="View Details">
+                                            <i data-feather="eye"></i>
+                                        </button>
+                                        <a href="{{ url_for('sales.create_deal') }}?{{ 'entity_id' if prospect_data.type == 'entity' else 'contact_id' }}={{ prospect.id }}" 
+                                           class="btn btn-outline-success" title="New Deal">
+                                            <i data-feather="plus"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- Expandable row for deal details -->
+                            <tr class="collapse" id="prospect-{{ prospect_data.type }}-{{ prospect.id }}-details">
+                                <td colspan="7" class="bg-light">
+                                    <div class="p-3">
+                                        <h6 class="mb-3">
+                                            <i data-feather="trending-up" class="me-2"></i>
+                                            Deal History ({{ prospect_data.deals|length }})
+                                        </h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm mb-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Deal Name</th>
+                                                        <th>Stage</th>
+                                                        <th>Owner</th>
+                                                        <th>Value</th>
+                                                        <th>Est. Close</th>
+                                                        <th>Updated</th>
+                                                        <th class="text-end">Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for deal in prospect_data.deals|sort(attribute='updated_at', reverse=true) %}
+                                                    <tr>
+                                                        <td>
+                                                            <a href="{{ url_for('sales.edit_deal', deal_id=deal.id) }}" 
+                                                               class="text-decoration-none">
+                                                                {{ deal.name }}
+                                                            </a>
+                                                        </td>
+                                                        <td>
+                                                            {% set stage_class = {
+                                                                0: 'secondary',
+                                                                1: 'info',
+                                                                2: 'warning',
+                                                                3: 'primary',
+                                                                4: 'success',
+                                                                5: 'dark'
+                                                            } %}
+                                                            <span class="badge bg-{{ stage_class.get(deal.stage, 'secondary') }}">
+                                                                {{ deal.stage_name }}
+                                                            </span>
+                                                        </td>
+                                                        <td>{{ deal.owner.full_name if deal.owner else 'Unassigned' }}</td>
+                                                        <td>
+                                                            {% if deal.est_premium_value %}
+                                                                ${{ "{:,.0f}".format(deal.est_premium_value) }}
+                                                            {% else %}
+                                                                <span class="text-muted">-</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>
+                                                            {% if deal.est_close_date %}
+                                                                {{ deal.est_close_date.strftime('%m/%d/%Y') }}
+                                                            {% else %}
+                                                                <span class="text-muted">-</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>
+                                                            <small class="text-muted">
+                                                                {{ deal.updated_at.strftime('%Y-%m-%d') }}
+                                                            </small>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <a href="{{ url_for('sales.edit_deal', deal_id=deal.id) }}" 
+                                                               class="btn btn-outline-primary btn-sm">
+                                                                <i data-feather="edit"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <img src="{{ url_for('static', filename='images/valhalla-logo.png') }}" alt="Valhalla Agency" class="mb-3" style="width: 64px; height: 64px; opacity: 0.6;">
+                    <h5 class="text-muted">No prospects found</h5>
+                    <p class="text-muted">Add prospects to start tracking opportunities and activity.</p>
+                    <div class="btn-group">
+                        <a href="{{ url_for('accounts.create_organization') }}" class="btn btn-primary">
+                            <i data-feather="briefcase" class="me-2"></i>Add Corporate Prospect
+                        </a>
+                        <a href="{{ url_for('accounts.create_individual') }}" class="btn btn-primary">
+                            <i data-feather="user" class="me-2"></i>Add Individual Prospect
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if prospects.pages > 1 %}
+            <div class="card-footer">
+                <nav aria-label="Prospects pagination">
+                    <ul class="pagination pagination-sm justify-content-center mb-0">
+                        {% if prospects.has_prev %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('sales.prospect_view', page=prospects.prev_num, **request.args) }}">Previous</a>
+                            </li>
+                        {% endif %}
+
+                        {% for page_num in prospects.iter_pages() %}
+                            {% if page_num %}
+                                {% if page_num != prospects.page %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('sales.prospect_view', page=page_num, **request.args) }}">{{ page_num }}</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ page_num }}</span>
+                                    </li>
+                                {% endif %}
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">…</span>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if prospects.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('sales.prospect_view', page=prospects.next_num, **request.args) }}">Next</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Summary Stats -->
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h4>{{ prospects.total }}</h4>
+                <p class="mb-0">Total Prospects</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h4>{{ prospects.items|selectattr('type', 'equalto', 'entity')|list|length }}</h4>
+                <p class="mb-0">Corporate Prospects</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h4>{{ prospects.items|selectattr('type', 'equalto', 'contact')|list|length }}</h4>
+                <p class="mb-0">Individual Prospects</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <h4>{{ prospects.items|sum(attribute='open_deals') }}</h4>
+                <p class="mb-0">Open Deals</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function viewProspectDetails(type, id) {
+    // Toggle the collapse for prospect details
+    const detailsRow = document.getElementById(`prospect-${type}-${id}-details`);
+    if (detailsRow) {
+        const collapse = new bootstrap.Collapse(detailsRow, {
+            toggle: true
+        });
+    }
+}
+
+// Auto-expand prospect details on page load if there's only one prospect
+document.addEventListener('DOMContentLoaded', function() {
+    const prospectRows = document.querySelectorAll('[id*="prospect-"][id*="-details"]');
+    if (prospectRows.length === 1) {
+        const collapse = new bootstrap.Collapse(prospectRows[0], {
+            show: true
+        });
+    }
+});
+</script>
+{% endblock %}

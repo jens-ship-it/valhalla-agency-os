@@ -1,0 +1,90 @@
+
+{% extends "base.html" %}
+
+{% block title %}New Policy - Valhalla Agency OS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2">
+                <i data-feather="shield" class="me-2"></i>
+                New Policy
+            </h1>
+            <a href="{{ url_for('policies.policies') }}" class="btn btn-secondary">
+                <i data-feather="arrow-left" class="me-2"></i>
+                Back to Policies
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Choose Policy Type</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card border-primary h-100">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <i data-feather="users" class="text-primary" style="width: 48px; height: 48px;"></i>
+                                </div>
+                                <h5 class="card-title">Group Policy</h5>
+                                <p class="card-text text-muted">
+                                    Create a policy for an organization or corporate client. 
+                                    These policies typically cover multiple employees or members.
+                                </p>
+                                <ul class="list-unstyled text-start small text-muted">
+                                    <li>• Medical, Dental, Vision</li>
+                                    <li>• Group Life Insurance</li>
+                                    <li>• Disability Coverage</li>
+                                    <li>• Multiple funding options</li>
+                                </ul>
+                                <div class="mt-auto">
+                                    <a href="{{ url_for('policies.create_group_policy') }}" class="btn btn-primary">
+                                        <i data-feather="plus" class="me-2"></i>
+                                        Create Group Policy
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card border-info h-100">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <i data-feather="user" class="text-info" style="width: 48px; height: 48px;"></i>
+                                </div>
+                                <h5 class="card-title">Individual Policy</h5>
+                                <p class="card-text text-muted">
+                                    Create a policy for an individual client. 
+                                    These are personal insurance policies for specific individuals.
+                                </p>
+                                <ul class="list-unstyled text-start small text-muted">
+                                    <li>• Life Insurance</li>
+                                    <li>• Disability Insurance</li>
+                                    <li>• Long-term Care</li>
+                                    <li>• Annuities</li>
+                                </ul>
+                                <div class="mt-auto">
+                                    <a href="{{ url_for('policies.create_individual_policy') }}" class="btn btn-info">
+                                        <i data-feather="plus" class="me-2"></i>
+                                        Create Individual Policy
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

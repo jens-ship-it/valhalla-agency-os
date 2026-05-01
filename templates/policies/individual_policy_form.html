@@ -1,0 +1,195 @@
+
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit' if policy else 'New' }} Individual Policy - Valhalla Agency OS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i data-feather="{{ 'edit' if policy else 'plus' }}" class="me-2"></i>
+                    {{ 'Edit' if policy else 'New' }} Individual Policy
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <!-- Individual and Carrier -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.client_id.label(class="form-label") }}
+                            {{ form.client_id(class="form-select" + (" is-invalid" if form.client_id.errors else "")) }}
+                            {% if form.client_id.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.client_id.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.carrier_id.label(class="form-label") }}
+                            {{ form.carrier_id(class="form-select" + (" is-invalid" if form.carrier_id.errors else "")) }}
+                            {% if form.carrier_id.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.carrier_id.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Product Type and Policy Number -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.product_type.label(class="form-label") }}
+                            <select name="product_type" id="product_type" class="form-select{{ ' is-invalid' if form.product_type.errors else '' }}" required>
+                                <option value="">Select Product Type</option>
+                                <option value="life">Life Insurance</option>
+                                <option value="health">Health Insurance</option>
+                                <option value="di">Disability Insurance</option>
+                                <option value="ltc">Long-term Care</option>
+                                <option value="annuity">Annuity</option>
+                                <option value="other">Other</option>
+                            </select>
+                            {% if form.product_type.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.product_type.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.policy_number.label(class="form-label") }}
+                            {{ form.policy_number(class="form-control" + (" is-invalid" if form.policy_number.errors else "")) }}
+                            {% if form.policy_number.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.policy_number.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Face Amount and Effective Date -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.face_amount.label(class="form-label") }}
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                {{ form.face_amount(class="form-control" + (" is-invalid" if form.face_amount.errors else "")) }}
+                            </div>
+                            {% if form.face_amount.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.face_amount.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            {{ form.effective_date.label(class="form-label") }}
+                            {{ form.effective_date(class="form-control" + (" is-invalid" if form.effective_date.errors else "")) }}
+                            {% if form.effective_date.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.effective_date.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Corporate Relationship -->
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.is_corporate_related(class="form-check-input", id="is_corporate_related") }}
+                            {{ form.is_corporate_related.label(class="form-check-label") }}
+                        </div>
+                        <div class="form-text">Check if this policy is related to a corporate entity</div>
+                    </div>
+                    
+                    <div id="corporate_fields" class="mb-3" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.corporate_entity_id.label(class="form-label") }}
+                                {{ form.corporate_entity_id(class="form-select" + (" is-invalid" if form.corporate_entity_id.errors else "")) }}
+                                {% if form.corporate_entity_id.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.corporate_entity_id.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.corporate_explanation.label(class="form-label") }}
+                                {{ form.corporate_explanation(class="form-control" + (" is-invalid" if form.corporate_explanation.errors else ""), placeholder="e.g., COLI, ICHRA, Split Dollar") }}
+                                {% if form.corporate_explanation.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.corporate_explanation.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Status -->
+                    <div class="mb-3">
+                        {{ form.status.label(class="form-label") }}
+                        {{ form.status(class="form-select" + (" is-invalid" if form.status.errors else "")) }}
+                        {% if form.status.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.status.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Notes -->
+                    <div class="mb-4">
+                        {{ form.notes.label(class="form-label") }}
+                        {{ form.notes(class="form-control", rows="4") }}
+                        {% if form.notes.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.notes.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('policies.policies') }}" class="btn btn-secondary">
+                            <i data-feather="arrow-left" class="me-2"></i>
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i data-feather="{{ 'save' if policy else 'plus' }}" class="me-2"></i>
+                            {{ 'Update Policy' if policy else 'Create Policy' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Corporate fields toggle
+    const corporateCheckbox = document.getElementById('is_corporate_related');
+    const corporateFields = document.getElementById('corporate_fields');
+    
+    if (corporateCheckbox && corporateFields) {
+        function toggleCorporateFields() {
+            if (corporateCheckbox.checked) {
+                corporateFields.style.display = 'block';
+            } else {
+                corporateFields.style.display = 'none';
+            }
+        }
+        
+        // Set initial state
+        toggleCorporateFields();
+        
+        // Add event listener
+        corporateCheckbox.addEventListener('change', toggleCorporateFields);
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,476 @@
+{% extends "base.html" %}
+
+{% block title %}{{ vendor.name }} - Valhalla Agency OS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-start mb-4">
+            <div>
+                <h1 class="h2">
+                    <i data-feather="briefcase" class="me-2"></i>
+                    {{ vendor.name }}
+                </h1>
+                <div class="d-flex align-items-center gap-2 mt-2">
+                    {% if vendor.status == 'active' %}
+                        <span class="badge bg-success">Active</span>
+                    {% else %}
+                        <span class="badge bg-danger">Inactive</span>
+                    {% endif %}
+
+                    {% set type_class = {
+                        'insurer': 'primary',
+                        'tpa': 'success',
+                        'pbm': 'info',
+                        'broker_partner': 'warning',
+                        'consultant': 'secondary',
+                        'attorney': 'dark',
+                        'administration_services': 'info',
+                        'other': 'light'
+                    } %}
+                    <span class="badge bg-{{ type_class.get(vendor_detail.vendor_type, 'secondary') }}">
+                        {% set vendor_type_choices = {
+                            'broker_partner': 'Broker Partner',
+                            'general_agent': 'General Agent',
+                            'insurer': 'Insurer',
+                            'administrator': 'Administrator',
+                            'administration_services': 'Administration Services',
+                            'mgu': 'MGU',
+                            'pbm': 'PBM',
+                            'consultant': 'Consultant',
+                            'actuary': 'Actuary',
+                            'attorney': 'Attorney'
+                        } %}
+                        {{ vendor_type_choices.get(vendor_detail.vendor_type, vendor_detail.vendor_type) }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <a href="{{ url_for('vendors.edit_vendor', vendor_id=vendor.id) }}" class="btn btn-outline-primary">
+                    <i data-feather="edit" class="me-2"></i>Edit
+                </a>
+                {% if vendor.status == 'active' %}
+                <button type="button" class="btn btn-outline-warning"
+                        onclick="inactivateVendor({{ vendor.id }}, '{{ vendor.name }}')">
+                    <i data-feather="archive" class="me-2"></i>Inactivate
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Vendor Information -->
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i data-feather="info" class="me-2"></i>
+                    Vendor Details
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if vendor_detail.description %}
+                <div class="mb-3">
+                    <h6>Role & Services</h6>
+                    <p class="text-muted">{{ vendor_detail.description }}</p>
+                </div>
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Contact Information</h6>
+                        {% if vendor.phone %}
+                            <p><strong>Phone:</strong>
+                                <a href="tel:{{ vendor.phone }}">{{ vendor.phone }}</a>
+                            </p>
+                        {% endif %}
+                        {% if vendor.email %}
+                            <p><strong>Email:</strong>
+                                <a href="mailto:{{ vendor.email }}">{{ vendor.email }}</a>
+                            </p>
+                        {% endif %}
+                        {% if vendor.website %}
+                            <p><strong>Website:</strong>
+                                <a href="{{ vendor.website }}" target="_blank">{{ vendor.website }}
+                                    <i data-feather="external-link" class="ms-1" style="width: 16px; height: 16px;"></i>
+                                </a>
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <h6>Address</h6>
+                        {% if vendor.full_address %}
+                            <address>{{ vendor.full_address }}</address>
+                        {% else %}
+                            <p class="text-muted">No address on file</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if vendor.notes %}
+                <div class="mt-3">
+                    <h6>Notes</h6>
+                    <p class="text-muted">{{ vendor.notes|nl2br }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Contacts -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i data-feather="users" class="me-2"></i>
+                    Contacts ({{ contact_links|length }})
+                </h5>
+                <div class="btn-group btn-group-sm">
+                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#linkContactModal">
+                        <i data-feather="link" class="me-1"></i>Link Existing
+                    </button>
+                    <a href="{{ url_for('contacts.create_contact', entity_type='vendor', entity_id=vendor.id) }}"
+                       class="btn btn-primary">
+                        <i data-feather="user-plus" class="me-1"></i>Create & Link
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if contact_links %}
+                <div class="row">
+                    {% for contact_link in contact_links %}
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-start">
+                            <div class="avatar-circle me-3">
+                                {{ contact_link.contact.first_name[0] }}{{ contact_link.contact.last_name[0] }}
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center">
+                                    <h6 class="mb-1">
+                                        <a href="{{ url_for('contacts.contact_detail', contact_id=contact_link.contact.id) }}"
+                                           class="text-decoration-none">
+                                            {{ contact_link.contact.full_name }}
+                                        </a>
+                                    </h6>
+                                    {% if contact_link.is_primary %}
+                                        <span class="badge bg-primary ms-2">Primary</span>
+                                    {% endif %}
+                                </div>
+                                {% if contact_link.role_at_entity %}
+                                    <p class="mb-1 text-muted">{{ contact_link.role_at_entity }}</p>
+                                {% endif %}
+                                {% if contact_link.contact.work_email %}
+                                    <small class="text-muted">{{ contact_link.contact.work_email }}</small><br>
+                                {% endif %}
+                                {% if contact_link.contact.preferred_phone %}
+                                    <small class="text-muted">{{ contact_link.contact.preferred_phone }}</small>
+                                {% endif %}
+                                <div class="d-flex align-items-center gap-2">
+                                    {% if contact_link.is_primary %}
+                                    <button type="button" class="btn btn-outline-warning btn-sm"
+                                            onclick="unmarkPrimary({{ contact_link.id }})">
+                                        <i data-feather="star" class="me-1"></i>Unmark Primary
+                                    </button>
+                                    {% else %}
+                                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                                            onclick="markPrimary({{ contact_link.id }})">
+                                        <i data-feather="star" class="me-1"></i>Mark Primary
+                                    </button>
+                                    {% endif %}
+                                    <button type="button" class="btn btn-outline-danger btn-sm"
+                                            onclick="unlinkContact({{ contact_link.id }}, '{{ contact_link.contact.full_name }}')">
+                                        <i data-feather="x" class="me-1"></i>Unlink
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center text-muted py-3">
+                    <i data-feather="users" class="mb-2" style="width: 32px; height: 32px;"></i>
+                    <p>No contacts linked to this vendor.</p>
+                    <a href="{{ url_for('contacts.create_contact', entity_type='vendor', entity_id=vendor.id) }}"
+                       class="btn btn-primary btn-sm">
+                        <i data-feather="user-plus" class="me-2"></i>Add First Contact
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="card-title mb-0">Vendor Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <small class="text-muted">Vendor Type</small>
+                    <div>{{ vendor_type_choices.get(vendor_detail.vendor_type, vendor_detail.vendor_type) }}</div>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">Status</small>
+                    <div>
+                        {% if vendor.status == 'active' %}
+                            <span class="badge bg-success">Active</span>
+                        {% else %}
+                            <span class="badge bg-danger">Inactive</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">Contacts</small>
+                    <div>{{ contact_links|length }} linked</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="card-title mb-0">Timeline</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <small class="text-muted">Created</small>
+                    <div>{{ vendor.created_at.strftime('%B %d, %Y') }}</div>
+                </div>
+                <div>
+                    <small class="text-muted">Last Updated</small>
+                    <div>{{ vendor.updated_at.strftime('%B %d, %Y') }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    {% if vendor.website %}
+                    <a href="{{ vendor.website }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                        <i data-feather="external-link" class="me-2"></i>Visit Website
+                    </a>
+                    {% endif %}
+                    {% if vendor.email %}
+                    <a href="mailto:{{ vendor.email }}" class="btn btn-outline-secondary btn-sm">
+                        <i data-feather="mail" class="me-2"></i>Send Email
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('vendors.edit_vendor', vendor_id=vendor.id) }}"
+                       class="btn btn-outline-secondary btn-sm">
+                        <i data-feather="edit" class="me-2"></i>Edit Vendor
+                    </a>
+                    <a href="{{ url_for('vendors.vendors') }}" class="btn btn-outline-secondary btn-sm">
+                        <i data-feather="arrow-left" class="me-2"></i>Back to Vendors
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Link Contact Modal -->
+<div class="modal fade" id="linkContactModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Link Existing Contact</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('contacts.create_link') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Search Contact</label>
+                        <input type="text" class="form-control" id="contactSearch" placeholder="Type to search contacts...">
+                        <div id="contactResults" class="mt-2"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Role at Vendor</label>
+                        <input type="text" name="role_at_entity" class="form-control" placeholder="e.g. Account Manager, Sales Rep">
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" name="is_primary" value="true" class="form-check-input" id="isPrimary">
+                        <label class="form-label" for="isPrimary">Primary Contact</label>
+                    </div>
+                    <input type="hidden" name="entity_type" value="vendor">
+                    <input type="hidden" name="entity_id" value="{{ vendor.id }}">
+                    <input type="hidden" name="contact_id" id="selectedContactId">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" disabled id="linkContactBtn">Link Contact</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Contact Link Modal -->
+<div class="modal fade" id="editContactLinkModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Contact Link</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('contacts.update_contact_link') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <input type="hidden" name="link_id" id="editLinkId">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Contact Name</label>
+                        <input type="text" class="form-control" id="editContactName" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Role at Vendor</label>
+                        <input type="text" name="role_at_entity" id="editRoleAtEntity" class="form-control" placeholder="e.g. Account Manager, Sales Rep">
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" name="is_primary" id="editIsPrimary" class="form-check-input">
+                        <label class="form-label" for="editIsPrimary">Primary Contact</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Inactivate Modal -->
+<div class="modal fade" id="inactivateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Inactivation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to inactivate this vendor?</p>
+                <div class="alert alert-warning">
+                    <i data-feather="alert-triangle" class="me-2"></i>
+                    This will inactivate the vendor and hide them from default lists.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{{ url_for('vendors.inactivate_vendor', vendor_id=vendor.id) }}" style="display: inline;">
+                    <button type="submit" class="btn btn-warning">Inactivate</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Contact search functionality
+document.getElementById('contactSearch').addEventListener('input', function(e) {
+    const query = e.target.value;
+    if (query.length < 2) {
+        document.getElementById('contactResults').innerHTML = '';
+        return;
+    }
+
+    fetch(`{{ url_for('contacts.search_contacts') }}?q=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(contacts => {
+            const results = document.getElementById('contactResults');
+            results.innerHTML = '';
+
+            contacts.forEach(contact => {
+                const div = document.createElement('div');
+                div.className = 'contact-search-result border rounded p-2 mb-1';
+                div.style.cursor = 'pointer';
+                div.innerHTML = `
+                    <div><strong>${contact.name}</strong></div>
+                    <small class="text-muted">${contact.email || ''}</small>
+                `;
+                div.onclick = () => selectContact(contact);
+                results.appendChild(div);
+            });
+        });
+});
+
+function selectContact(contact) {
+    document.getElementById('selectedContactId').value = contact.id;
+    document.getElementById('contactSearch').value = contact.name;
+    document.getElementById('contactResults').innerHTML = '';
+    document.getElementById('linkContactBtn').disabled = false;
+}
+
+function inactivateVendor(vendorId, vendorName) {
+    const modal = new bootstrap.Modal(document.getElementById('inactivateModal'));
+    modal.show();
+}
+
+function unlinkContact(linkId, contactName) {
+    if (confirm(`Unlink ${contactName} from this vendor?`)) {
+        fetch(`{{ url_for('contacts.delete_link', link_id=0) }}`.replace('0', linkId), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': document.querySelector('meta[name=csrf-token]').getAttribute('content')
+            }
+        }).then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Error unlinking contact. Please try again.');
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+            alert('Error unlinking contact. Please try again.');
+        });
+    }
+}
+
+function markPrimary(linkId) {
+    fetch(`{{ url_for('contacts.mark_primary', link_id=0) }}`.replace('0', linkId), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': document.querySelector('meta[name=csrf-token]').getAttribute('content')
+        }
+    }).then(response => {
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Error marking contact as primary. Please try again.');
+        }
+    }).catch(error => {
+        console.error('Error:', error);
+        alert('Error marking contact as primary. Please try again.');
+    });
+}
+
+function unmarkPrimary(linkId) {
+    fetch(`{{ url_for('contacts.unmark_primary', link_id=0) }}`.replace('0', linkId), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': document.querySelector('meta[name=csrf-token]').getAttribute('content')
+        }
+    }).then(response => {
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Error unmarking contact as primary. Please try again.');
+        }
+    }).catch(error => {
+        console.error('Error:', error);
+        alert('Error unmarking contact as primary. Please try again.');
+    });
+}
+</script>
+{% endblock %}

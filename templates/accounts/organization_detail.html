@@ -1,0 +1,627 @@
+{% extends "base.html" %}
+
+{% block title %}{{ organization.name }} - Valhalla Agency OS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-start mb-4">
+            <div>
+                <h1 class="h2">
+                    <i data-feather="building" class="me-2"></i>
+                    {{ organization.name }}
+                </h1>
+                <div class="d-flex align-items-center gap-2 mt-2">
+                    {% if organization.status == 'active' %}
+                        <span class="badge bg-success">Active</span>
+                    {% else %}
+                        <span class="badge bg-danger">Inactive</span>
+                    {% endif %}
+
+                    {% if organization.industry %}
+                        <span class="badge bg-secondary">{{ organization.industry }}</span>
+                    {% endif %}
+
+                    {% if organization.fein %}
+                        <span class="badge bg-info">FEIN: {{ organization.fein }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <a href="{{ url_for('accounts.edit_organization', org_id=organization.id) }}" class="btn btn-outline-primary">
+                    <i data-feather="edit" class="me-2"></i>Edit
+                </a>
+                {% if organization.status == 'active' %}
+                <button type="button" class="btn btn-outline-warning"
+                        onclick="inactivateOrganization({{ organization.id }}, '{{ organization.name }}')">
+                    <i data-feather="archive" class="me-2"></i>Inactivate
+                </button>
+                {% endif %}
+                {% if current_user.has_role('admin') %}
+                <button type="button" class="btn btn-outline-danger"
+                        onclick="deleteOrganization({{ organization.id }}, '{{ organization.name }}')">
+                    <i data-feather="trash-2" class="me-2"></i>Delete
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Organization Information -->
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i data-feather="info" class="me-2"></i>
+                    Organization Details
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Contact Information</h6>
+                        {% if organization.primary_contact_name %}
+                            <p><strong>Primary Contact:</strong> {{ organization.primary_contact_name }}</p>
+                        {% endif %}
+                        {% if organization.email %}
+                            <p><strong>Email:</strong>
+                                <a href="mailto:{{ organization.email }}">{{ organization.email }}</a>
+                            </p>
+                        {% endif %}
+                        {% if organization.phone %}
+                            <p><strong>Phone:</strong>
+                                <a href="tel:{{ organization.phone }}">{{ organization.phone }}</a>
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <h6>Address</h6>
+                        {% if organization.full_address %}
+                            <address>{{ organization.full_address }}</address>
+                        {% else %}
+                            <p class="text-muted">No address on file</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if organization.notes %}
+                <div class="mt-3">
+                    <h6>Notes</h6>
+                    <p class="text-muted">{{ organization.notes|nl2br }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Contacts -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i data-feather="users" class="me-2"></i>
+                    Contacts ({{ contact_links|length }})
+                </h5>
+                <div class="btn-group btn-group-sm">
+                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#linkContactModal">
+                        <i data-feather="link" class="me-1"></i>Link Existing
+                    </button>
+                    <a href="{{ url_for('contacts.create_contact', entity_type='organization', entity_id=organization.id) }}"
+                       class="btn btn-primary">
+                        <i data-feather="user-plus" class="me-1"></i>Create & Link
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if contact_links %}
+                <div class="row">
+                    {% for contact_link in contact_links %}
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-start">
+                            <div class="avatar-circle me-3">
+                                {{ contact_link.contact.first_name[0] }}{{ contact_link.contact.last_name[0] }}
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center">
+                                    <h6 class="mb-1">
+                                        <a href="{{ url_for('contacts.contact_detail', contact_id=contact_link.contact.id) }}"
+                                           class="text-decoration-none">
+                                            {{ contact_link.contact.full_name }}
+                                        </a>
+                                    </h6>
+                                    {% if contact_link.is_primary %}
+                                        <span class="badge bg-primary ms-2">Primary</span>
+                                    {% endif %}
+                                </div>
+                                {% if contact_link.role_at_entity %}
+                                    <p class="mb-1 text-muted">{{ contact_link.role_at_entity }}</p>
+                                {% endif %}
+                                {% if contact_link.contact.email %}
+                                    <small class="text-muted">{{ contact_link.contact.email }}</small><br>
+                                {% endif %}
+                                {% if contact_link.contact.preferred_phone %}
+                                    <small class="text-muted">{{ contact_link.contact.preferred_phone }}</small>
+                                {% endif %}
+                                <div class="mt-2">
+                                    {% if contact_link.is_primary %}
+                                    <button type="button" class="btn btn-outline-warning btn-sm"
+                                            onclick="unmarkPrimary({{ contact_link.id }})">
+                                        <i data-feather="star" class="me-1"></i>Unmark Primary
+                                    </button>
+                                    {% else %}
+                                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                                            onclick="markPrimary({{ contact_link.id }})">
+                                        <i data-feather="star" class="me-1"></i>Mark Primary
+                                    </button>
+                                    {% endif %}
+                                    <button type="button" class="btn btn-outline-danger btn-sm"
+                                            onclick="unlinkContact({{ contact_link.id }}, '{{ contact_link.contact.full_name }}')">
+                                        <i data-feather="x" class="me-1"></i>Unlink
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center text-muted py-3">
+                    <i data-feather="users" class="mb-2" style="width: 32px; height: 32px;"></i>
+                    <p>No contacts linked to this organization.</p>
+                    <a href="{{ url_for('contacts.create_contact', entity_type='organization', entity_id=organization.id) }}"
+                       class="btn btn-primary btn-sm">
+                        <i data-feather="user-plus" class="me-2"></i>Add First Contact
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Service Items -->
+        {% if recent_tickets %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i data-feather="clipboard" class="me-2"></i>
+                    Recent Service Items ({{ recent_tickets|length }})
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Status</th>
+                                <th>Assigned To</th>
+                                <th>Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ticket in recent_tickets %}
+                            <tr>
+                                <td><code>#{{ ticket.id }}</code></td>
+                                <td>
+                                    <a href="{{ url_for('service.ticket_detail', ticket_id=ticket.id) }}"
+                                       class="text-decoration-none">
+                                        {{ ticket.title }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {% set status_class = {
+                                        'not_started': 'secondary',
+                                        'started': 'primary',
+                                        'started_waiting_on_someone_else': 'warning',
+                                        'complete_pending_confirmation': 'info',
+                                        'complete': 'success'
+                                    } %}
+                                    <span class="badge bg-{{ status_class.get(ticket.status, 'secondary') }}">
+                                        {{ dict(ticket.get_status_choices())[ticket.status] }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if ticket.assigned_to %}
+                                        {{ ticket.assigned_to.full_name }}
+                                    {% else %}
+                                        <span class="text-muted">Unassigned</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        {{ ticket.updated_at.strftime('%Y-%m-%d') }}
+                                    </small>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Group Policies -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i data-feather="shield" class="me-2"></i>
+                    Group Policies ({{ organization.group_policies|length }})
+                </h5>
+                <a href="{{ url_for('accounts.create_group_policy', org_id=organization.id) }}" class="btn btn-primary btn-sm">
+                    <i data-feather="plus" class="me-2"></i>New Policy
+                </a>
+            </div>
+            <div class="card-body p-0">
+                {% if organization.group_policies %}
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Carrier</th>
+                                <th>Product Type</th>
+                                <th>Policy Number</th>
+                                <th>Effective Date</th>
+                                <th>Renewal Date</th>
+                                <th>Estimated Monthly Revenue</th>
+                                <th>Status</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for policy in organization.group_policies %}
+                            <tr>
+                                <td>{{ policy.carrier.name if policy.carrier else 'N/A' }}</td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ policy.product_type.replace('_', ' ').title() }}</span>
+                                </td>
+                                <td>
+                                    {% if policy.policy_number %}
+                                        <code>{{ policy.policy_number }}</code>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ policy.effective_date.strftime('%Y-%m-%d') }}</td>
+                                <td>
+                                    {% if policy.renewal_date %}
+                                        {{ policy.renewal_date.strftime('%m/%d/%Y') }}
+                                        {% if policy.is_due_for_renewal %}
+                                            <span class="badge bg-warning ms-1">Due Soon</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if policy.estimated_monthly_revenue %}
+                                        <span class="text-success fw-bold">${{ "{:,.2f}".format(policy.estimated_monthly_revenue) }}</span>
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if policy.is_active else 'secondary' }}">
+                                        {{ policy.status.replace('_', ' ').title() }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('policies.edit_group_policy', policy_id=policy.id) }}"
+                                           class="btn btn-outline-primary" title="Edit Policy">
+                                            <i data-feather="edit"></i>
+                                        </a>
+                                        <a href="{{ url_for('policies.group_policy_detail', policy_id=policy.id) }}"
+                                           class="btn btn-outline-info" title="View Details">
+                                            <i data-feather="eye"></i>
+                                        </a>
+                                        {% if policy.status == 'active' %}
+                                        <button class="btn btn-outline-warning" title="Terminate Policy"
+                                                onclick="terminatePolicy({{ policy.id }}, '{{ policy.carrier.name if policy.carrier else 'Unknown' }} {{ policy.product_type.replace('_', ' ').title() }}')">
+                                            <i data-feather="x-circle"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center text-muted py-4">
+                    <i data-feather="shield" class="mb-2" style="width: 32px; height: 32px;"></i>
+                    <p>No group policies on file.</p>
+                    <a href="{{ url_for('accounts.create_group_policy', org_id=organization.id) }}" class="btn btn-primary btn-sm">
+                        <i data-feather="plus" class="me-2"></i>Add First Policy
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="card-title mb-0">Quick Stats</h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <div class="border-end">
+                            <h4 class="text-primary">{{ organization.group_policies|length }}</h4>
+                            <small class="text-muted">Total Policies</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-success">{{ organization.active_policies_count }}</h4>
+                        <small class="text-muted">Active Policies</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="card-title mb-0">Timeline</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <small class="text-muted">Created</small>
+                    <div>{{ organization.created_at.strftime('%B %d, %Y') }}</div>
+                </div>
+                <div>
+                    <small class="text-muted">Last Updated</small>
+                    <div>{{ organization.updated_at.strftime('%B %d, %Y') }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('service.create_ticket') }}?client_type=organization&client_id={{ organization.id }}"
+                       class="btn btn-outline-primary btn-sm">
+                        <i data-feather="plus" class="me-2"></i>Create Service Ticket
+                    </a>
+                    <a href="{{ url_for('sales.create_deal') }}?organization_id={{ organization.id }}"
+                       class="btn btn-outline-success btn-sm">
+                        <i data-feather="trending-up" class="me-2"></i>Create Deal
+                    </a>
+                    <a href="{{ url_for('accounts.edit_organization', org_id=organization.id) }}"
+                       class="btn btn-outline-secondary btn-sm">
+                        <i data-feather="edit" class="me-2"></i>Edit Organization
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Link Contact Modal -->
+<div class="modal fade" id="linkContactModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Link Existing Contact</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('contacts.create_link') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Search Contact</label>
+                        <input type="text" class="form-control" id="contactSearch" placeholder="Type to search contacts...">
+                        <div id="contactResults" class="mt-2"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Role at Organization</label>
+                        <input type="text" name="role_at_entity" class="form-control" placeholder="e.g. HR Director, Benefits Lead">
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" name="is_primary" value="true" class="form-check-input" id="isPrimary">
+                        <label class="form-label" for="isPrimary">Primary Contact</label>
+                    </div>
+                    <input type="hidden" name="entity_type" value="organization">
+                    <input type="hidden" name="entity_id" value="{{ organization.id }}">
+                    <input type="hidden" name="contact_id" id="selectedContactId">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" disabled id="linkContactBtn">Link Contact</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Inactivate Modal -->
+<div class="modal fade" id="inactivateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Inactivation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to inactivate this organization?</p>
+                <div class="alert alert-warning">
+                    <i data-feather="alert-triangle" class="me-2"></i>
+                    This will inactivate the organization. Active policies must be terminated first.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{{ url_for('accounts.inactivate_organization', org_id=organization.id) }}" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="btn btn-warning">Inactivate</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to <strong>permanently delete</strong> this organization?</p>
+                <div class="alert alert-danger">
+                    <i data-feather="alert-triangle" class="me-2"></i>
+                    <strong>This action cannot be undone!</strong> All data associated with this organization will be permanently deleted.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{{ url_for('accounts.delete_organization', org_id=organization.id) }}" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="btn btn-danger">Delete Permanently</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Contact search functionality
+document.getElementById('contactSearch').addEventListener('input', function(e) {
+    const query = e.target.value;
+    if (query.length < 2) {
+        document.getElementById('contactResults').innerHTML = '';
+        return;
+    }
+
+    fetch(`{{ url_for('contacts.search_contacts') }}?q=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(contacts => {
+            const results = document.getElementById('contactResults');
+            results.innerHTML = '';
+
+            contacts.forEach(contact => {
+                const div = document.createElement('div');
+                div.className = 'contact-search-result border rounded p-2 mb-1';
+                div.style.cursor = 'pointer';
+                div.innerHTML = `
+                    <div><strong>${contact.name}</strong></div>
+                    <small class="text-muted">${contact.email || ''}</small>
+                `;
+                div.onclick = () => selectContact(contact);
+                results.appendChild(div);
+            });
+        });
+});
+
+function selectContact(contact) {
+    document.getElementById('selectedContactId').value = contact.id;
+    document.getElementById('contactSearch').value = contact.name;
+    document.getElementById('contactResults').innerHTML = '';
+    document.getElementById('linkContactBtn').disabled = false;
+}
+
+function inactivateOrganization(orgId, orgName) {
+    const modal = new bootstrap.Modal(document.getElementById('inactivateModal'));
+    modal.show();
+}
+
+function deleteOrganization(orgId, orgName) {
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
+}
+
+function unlinkContact(linkId, contactName) {
+    if (confirm(`Unlink ${contactName} from this organization?`)) {
+        fetch(`{{ url_for('contacts.delete_link', link_id=0) }}`.replace('0', linkId), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            }
+        }).then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Error unlinking contact. Please try again.');
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+            alert('Error unlinking contact. Please try again.');
+        });
+    }
+}
+
+function markPrimary(linkId) {
+    fetch(`{{ url_for('contacts.mark_primary', link_id=0) }}`.replace('0', linkId), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token() }}'
+        }
+    }).then(response => {
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Error marking contact as primary. Please try again.');
+        }
+    }).catch(error => {
+        console.error('Error:', error);
+        alert('Error marking contact as primary. Please try again.');
+    });
+}
+
+function unmarkPrimary(linkId) {
+    fetch(`{{ url_for('contacts.unmark_primary', link_id=0) }}`.replace('0', linkId), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token() }}'
+        }
+    }).then(response => {
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Error unmarking contact as primary. Please try again.');
+        }
+    }).catch(error => {
+        console.error('Error:', error);
+        alert('Error unmarking contact as primary. Please try again.');
+    });
+}
+
+function terminatePolicy(policyId, policyName) {
+    if (confirm(`Are you sure you want to terminate the ${policyName} policy?`)) {
+        fetch(`{{ url_for('policies.terminate_group_policy', policy_id=0) }}`.replace('0', policyId), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            }
+        }).then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Error terminating policy. Please try again.');
+            }
+        }).catch(error => {
+            console.error('Error:', error);
+            alert('Error terminating policy. Please try again.');
+        });
+    }
+}
+</script>
+{% endblock %}

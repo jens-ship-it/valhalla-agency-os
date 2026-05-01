@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block title %}New Individual Client + Policy - Step 2{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i data-feather="user-plus" class="me-2"></i>
+            New Individual Client + Policy
+        </h2>
+
+        <!-- Progress Indicator -->
+        <div class="mb-4">
+            <div class="d-flex justify-content-between mb-2">
+                <span class="badge bg-success"><i data-feather="check" class="feather-sm"></i> Step 1: Client Info</span>
+                <span class="badge bg-primary">Step 2: Corporate Link</span>
+                <span class="badge bg-secondary">Step 3: Policy Details</span>
+            </div>
+            <div class="progress" style="height: 3px;">
+                <div class="progress-bar bg-primary" role="progressbar" style="width: 66%"></div>
+            </div>
+        </div>
+
+        <!-- Client Summary -->
+        <div class="alert alert-info mb-4">
+            <strong>Creating client:</strong> {{ wizard_data.first_name }} {{ wizard_data.last_name }}
+            {% if wizard_data.email %} ({{ wizard_data.email }}){% endif %}
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Corporate Relationship (Optional)</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('accounts.wizard_individual_policy_entity') }}" id="entityForm">
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Is this policy related to a corporate entity?</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="is_corporate_related" id="relatedYes" value="yes">
+                            <label class="form-check-label" for="relatedYes">
+                                Yes - This policy is corporate-related (COLI, ICHRA, etc.)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="is_corporate_related" id="relatedNo" value="no" checked>
+                            <label class="form-check-label" for="relatedNo">
+                                No - This is a personal policy
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="entitySection" style="display: none;">
+                        <div class="mb-3">
+                            <label for="entitySearch" class="form-label">Search for Corporate Entity</label>
+                            <input type="text" class="form-control" id="entitySearch" placeholder="Start typing to search...">
+                            <div id="searchResults" class="list-group mt-2" style="display: none;"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Or select from recent entities:</label>
+                            <select class="form-select" name="entity_id" id="entitySelect">
+                                <option value="none">-- No corporate relationship --</option>
+                                {% for entity in entities %}
+                                <option value="{{ entity.id }}">{{ entity.name }}{% if entity.city %} ({{ entity.city }}, {{ entity.state }}){% endif %}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#quickAddModal">
+                                <i data-feather="plus-circle" class="me-1"></i>Create New Corporate Entity
+                            </button>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="corporate_explanation" class="form-label">Relationship Type/Explanation</label>
+                            <input type="text" class="form-control" name="corporate_explanation" id="corporate_explanation" 
+                                   placeholder="e.g., COLI, ICHRA, Corporate Buy-Sell">
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="entity_id" id="selectedEntityId" value="none">
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('accounts.wizard_individual_policy_start') }}" class="btn btn-secondary">
+                            <i data-feather="arrow-left" class="me-1"></i>Back
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            Next: Policy Details <i data-feather="arrow-right" class="ms-1"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Add Modal -->
+<div class="modal fade" id="quickAddModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Quick Add Corporate Entity</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="quickAddForm">
+                    <div class="mb-3">
+                        <label for="quickName" class="form-label">Company Name *</label>
+                        <input type="text" class="form-control" id="quickName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="quickIndustry" class="form-label">Industry</label>
+                        <input type="text" class="form-control" id="quickIndustry" name="industry">
+                    </div>
+                    <div class="row">
+                        <div class="col-8 mb-3">
+                            <label for="quickCity" class="form-label">City</label>
+                            <input type="text" class="form-control" id="quickCity" name="city">
+                        </div>
+                        <div class="col-4 mb-3">
+                            <label for="quickState" class="form-label">State</label>
+                            <input type="text" class="form-control" id="quickState" name="state" maxlength="2">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="quickAddSave">Save Entity</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Show/hide entity section based on corporate related selection
+document.querySelectorAll('input[name="is_corporate_related"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const entitySection = document.getElementById('entitySection');
+        if (this.value === 'yes') {
+            entitySection.style.display = 'block';
+        } else {
+            entitySection.style.display = 'none';
+            document.getElementById('selectedEntityId').value = 'none';
+        }
+    });
+});
+
+// Entity autocomplete search
+let searchTimeout;
+document.getElementById('entitySearch').addEventListener('input', function(e) {
+    clearTimeout(searchTimeout);
+    const query = e.target.value;
+    
+    if (query.length < 2) {
+        document.getElementById('searchResults').style.display = 'none';
+        return;
+    }
+    
+    searchTimeout = setTimeout(() => {
+        fetch(`/accounts/api/entities/search?q=${encodeURIComponent(query)}`)
+            .then(r => r.json())
+            .then(results => {
+                const resultsDiv = document.getElementById('searchResults');
+                if (results.length === 0) {
+                    resultsDiv.style.display = 'none';
+                    return;
+                }
+                
+                resultsDiv.innerHTML = results.map(e => `
+                    <a href="#" class="list-group-item list-group-item-action entity-result" data-id="${e.id}" data-name="${e.name}">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">${e.name}</h6>
+                            <small>${e.city ? e.city + ', ' + e.state : ''}</small>
+                        </div>
+                        ${e.industry ? '<small class="text-muted">' + e.industry + '</small>' : ''}
+                    </a>
+                `).join('');
+                resultsDiv.style.display = 'block';
+                
+                // Add click handlers
+                document.querySelectorAll('.entity-result').forEach(item => {
+                    item.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        document.getElementById('selectedEntityId').value = this.dataset.id;
+                        document.getElementById('entitySearch').value = this.dataset.name;
+                        resultsDiv.style.display = 'none';
+                    });
+                });
+            });
+    }, 300);
+});
+
+// Quick add entity
+document.getElementById('quickAddSave').addEventListener('click', function() {
+    const formData = new FormData(document.getElementById('quickAddForm'));
+    
+    fetch('/accounts/api/entities/quick-add', {
+        method: 'POST',
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.error) {
+            alert('Error: ' + data.error);
+            return;
+        }
+        
+        // Add to dropdown
+        const select = document.getElementById('entitySelect');
+        const option = new Option(data.name + (data.city ? ` (${data.city}, ${data.state})` : ''), data.id);
+        select.add(option);
+        select.value = data.id;
+        document.getElementById('selectedEntityId').value = data.id;
+        
+        // Close modal and clear form
+        bootstrap.Modal.getInstance(document.getElementById('quickAddModal')).hide();
+        document.getElementById('quickAddForm').reset();
+    });
+});
+
+// Update hidden field when dropdown changes
+document.getElementById('entitySelect').addEventListener('change', function() {
+    document.getElementById('selectedEntityId').value = this.value;
+});
+</script>
+{% endblock %}

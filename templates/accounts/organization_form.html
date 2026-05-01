@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit Organization' if organization else 'New Organization' }} - Valhalla Agency OS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">
+                    <i data-feather="{{ 'edit' if organization else 'plus' }}" class="me-2"></i>
+                    {{ 'Edit Organization' if organization else 'New Organization' }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+
+                    <!-- Basic Information -->
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            {{ form.name.label(class="form-label") }}
+                            {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                            {% if form.name.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.name.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            {{ form.fein.label(class="form-label") }}
+                            {{ form.fein(class="form-control" + (" is-invalid" if form.fein.errors else "")) }}
+                            {% if form.fein.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.fein.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Federal Employer Identification Number</div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            {{ form.sic_code.label(class="form-label") }}
+                            {{ form.sic_code(class="form-control" + (" is-invalid" if form.sic_code.errors else "")) }}
+                            {% if form.sic_code.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.sic_code.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Standard Industrial Classification</div>
+                        </div>
+
+                        <div class="col-md-8 mb-3">
+                            {{ form.industry.label(class="form-label") }}
+                            {{ form.industry(class="form-control" + (" is-invalid" if form.industry.errors else "")) }}
+                            {% if form.industry.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.industry.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Status</label>
+                            <select name="status" class="form-select">
+                                <option value="active" {% if not organization or organization.status == 'active' %}selected{% endif %}>Active</option>
+                                <option value="inactive" {% if organization and organization.status == 'inactive' %}selected{% endif %}>Inactive</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Applicable Large Employer (ALE)</label>
+                            <div class="form-check-container">
+                                <div class="form-check form-check-inline">
+                                    {{ form.is_applicable_large_employer(class="form-check-input", id="ale_yes") }}
+                                    <label class="form-check-label" for="ale_yes">
+                                        Yes - 50+ full-time equivalent employees
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-text">Organizations with 50+ FTE employees must comply with ACA employer mandate</div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <h5 class="mt-4 mb-3">
+                        <i data-feather="user" class="me-2"></i>
+                        Primary Contact
+                    </h5>
+
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            {{ form.primary_contact_id.label(class="form-label") }}
+                            {{ form.primary_contact_id(class="form-select" + (" is-invalid" if form.primary_contact_id.errors else "")) }}
+                            {% if form.primary_contact_id.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.primary_contact_id.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                    Select an existing contact or <a href="{{ url_for('contacts.create_contact', return_to='organization_form') }}" class="text-primary" target="_blank">create a new contact</a> first
+                                </div>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            {{ form.contact_role.label(class="form-label") }}
+                            {{ form.contact_role(class="form-control" + (" is-invalid" if form.contact_role.errors else ""), placeholder="e.g., HR Director, Benefits Manager") }}
+                            {% if form.contact_role.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.contact_role.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Address -->
+                    <h5 class="mt-4 mb-3">
+                        <i data-feather="map-pin" class="me-2"></i>
+                        Address
+                    </h5>
+
+                    <div class="mb-3">
+                        {{ form.address_line1.label(class="form-label") }}
+                        {{ form.address_line1(class="form-control" + (" is-invalid" if form.address_line1.errors else "")) }}
+                        {% if form.address_line1.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.address_line1.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.address_line2.label(class="form-label") }}
+                        {{ form.address_line2(class="form-control" + (" is-invalid" if form.address_line2.errors else "")) }}
+                        {% if form.address_line2.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.address_line2.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-5 mb-3">
+                            {{ form.city.label(class="form-label") }}
+                            {{ form.city(class="form-control" + (" is-invalid" if form.city.errors else "")) }}
+                            {% if form.city.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.city.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            {{ form.state.label(class="form-label") }}
+                            {{ form.state(class="form-control" + (" is-invalid" if form.state.errors else "")) }}
+                            {% if form.state.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.state.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            {{ form.zip.label(class="form-label") }}
+                            {{ form.zip(class="form-control" + (" is-invalid" if form.zip.errors else "")) }}
+                            {% if form.zip.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.zip.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="mb-4">
+                        {{ form.notes.label(class="form-label") }}
+                        {{ form.notes(class="form-control", rows="4") }}
+                        {% if form.notes.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.notes.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('accounts.organizations') }}" class="btn btn-secondary">
+                            <i data-feather="arrow-left" class="me-2"></i>
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i data-feather="{{ 'save' if organization else 'plus' }}" class="me-2"></i>
+                            {{ 'Update Organization' if organization else 'Create Organization' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
